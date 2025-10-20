@@ -1531,22 +1531,38 @@ window.generarReporteIndividual = async function() {
         }
         
         console.log('✅ Estudiante encontrado:', estudiante);
+        console.log('📊 Datos del estudiante:');
+        console.log('  - Documento:', estudiante.documento);
+        console.log('  - Nombre completo original:', estudiante.nombreCompleto);
+        console.log('  - Primer nombre:', estudiante.primerNombre);
+        console.log('  - Segundo nombre:', estudiante.segundoNombre);
+        console.log('  - Primer apellido:', estudiante.primerApellido);
+        console.log('  - Segundo apellido:', estudiante.segundoApellido);
+        console.log('  - Puntaje global:', estudiante.puntajeGlobal);
+        console.log('  - Notas:', estudiante.notas);
         
         // Filtrar incentivos del estudiante específico
         const incentivosEstudiante = todosLosIncentivos.filter(incentivo => 
             incentivo.documentoEstudiante === documento
         );
+        console.log('🎯 Incentivos del estudiante:', incentivosEstudiante);
         
         // Procesar datos básicos usando la misma estructura que otros reportes
         const nombreCompleto = estudiante.nombreCompleto || 
             `${estudiante.primerNombre || ''} ${estudiante.segundoNombre || ''} ${estudiante.primerApellido || ''} ${estudiante.segundoApellido || ''}`.trim();
+        console.log('📝 Nombre completo procesado:', nombreCompleto);
         
         const puntajeGlobal = estudiante.puntajeGlobal || 0;
         const puedeGraduar = puntajeGlobal >= 80;
         const tieneIncentivos = incentivosEstudiante.length > 0;
+        console.log('📊 Datos procesados:');
+        console.log('  - Puntaje global:', puntajeGlobal);
+        console.log('  - Puede graduar:', puedeGraduar);
+        console.log('  - Tiene incentivos:', tieneIncentivos);
         
         // Procesar notas del estudiante
         const notas = estudiante.notas || [];
+        console.log('📚 Notas del estudiante:', notas);
         
         const competenciasGenericas = notas.filter(n => 
             ['Comunicación Escrita', 'Razonamiento Cuantitativo', 'Lectura Crítica', 'Competencias Ciudadanas', 'Inglés'].includes(n.materia)
@@ -1554,6 +1570,7 @@ window.generarReporteIndividual = async function() {
             nombre: comp.materia,
             valor: comp.puntaje
         }));
+        console.log('🔤 Competencias genéricas:', competenciasGenericas);
         
         const competenciasEspecificas = notas.filter(n => 
             ['Formulación de Proyectos de Ingeniería', 'Diseño de Software'].includes(n.materia)
@@ -1561,6 +1578,7 @@ window.generarReporteIndividual = async function() {
             nombre: comp.materia,
             valor: comp.puntaje
         }));
+        console.log('⚙️ Competencias específicas:', competenciasEspecificas);
         
         const promedioGeneral = notas.length > 0 ? 
             (notas.reduce((sum, nota) => sum + nota.puntaje, 0) / notas.length).toFixed(2) : 0;
@@ -1569,6 +1587,11 @@ window.generarReporteIndividual = async function() {
             notas.reduce((max, nota) => nota.puntaje > max.puntaje ? nota : max, notas[0]) 
             : {puntaje: 0, materia: 'Ninguna'};
         
+        console.log('📊 Estadísticas calculadas:');
+        console.log('  - Promedio general:', promedioGeneral);
+        console.log('  - Competencia destacada:', competenciaDestacada);
+        
+        console.log('🛠️ Iniciando generación de HTML...');
         // Generar el HTML usando la función auxiliar
         const htmlContent = generarHTMLReporte(
             estudiante,
@@ -1582,10 +1605,21 @@ window.generarReporteIndividual = async function() {
             promedioGeneral
         );
         
-        // Crear ventana con el reporte
+        console.log('✅ HTML generado exitosamente. Longitud:', htmlContent.length, 'caracteres');
+        
+        // Intentar abrir en ventana emergente, si falla mostrar en modal
+        console.log('🪟 Intentando abrir nueva ventana para el reporte...');
         const reporteWindow = window.open('', '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
-        reporteWindow.document.write(htmlContent);
-        reporteWindow.document.close();
+        
+        if (!reporteWindow || reporteWindow.closed || typeof reporteWindow.closed === 'undefined') {
+            console.log('⚠️ Ventana emergente bloqueada, mostrando reporte en modal...');
+            mostrarReporteEnModal(htmlContent, estudiante.documento);
+        } else {
+            console.log('📝 Escribiendo contenido HTML en la ventana...');
+            reporteWindow.document.write(htmlContent);
+            reporteWindow.document.close();
+            console.log('🎉 Ventana del reporte creada exitosamente');
+        }
         
         // Actualizar último reporte generado
         document.getElementById('ultimoReporte').textContent = 
@@ -1599,6 +1633,133 @@ window.generarReporteIndividual = async function() {
     }
 };
 
+// Función para mostrar el reporte en un modal cuando las ventanas emergentes están bloqueadas
+function mostrarReporteEnModal(htmlContent, documento) {
+    console.log('🖥️ Creando modal para mostrar el reporte...');
+    
+    // Crear el modal
+    const modalHtml = `
+        <div class="modal fade" id="reporteModal" tabindex="-1" aria-labelledby="reporteModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-fullscreen">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="reporteModalLabel">
+                            <i class="fas fa-file-alt me-2"></i>Reporte Individual - Documento: ${documento}
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-0" style="overflow-y: auto;">
+                        <iframe id="reporteFrame" style="width: 100%; height: 80vh; border: none;"></iframe>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>Cerrar
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="descargarReporteDesdeModal()">
+                            <i class="fas fa-download me-2"></i>Descargar PDF
+                        </button>
+                        <button type="button" class="btn btn-success" onclick="abrirReporteEnNuevaVentana()">
+                            <i class="fas fa-external-link-alt me-2"></i>Abrir en Nueva Ventana
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Eliminar modal anterior si existe
+    const existingModal = document.getElementById('reporteModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Insertar el modal en el DOM
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Configurar el iframe con el contenido del reporte
+    const iframe = document.getElementById('reporteFrame');
+    iframe.onload = function() {
+        iframe.contentDocument.open();
+        iframe.contentDocument.write(htmlContent);
+        iframe.contentDocument.close();
+        console.log('✅ Reporte cargado en el modal exitosamente');
+    };
+    
+    // Mostrar el modal
+    const modal = new bootstrap.Modal(document.getElementById('reporteModal'));
+    modal.show();
+    
+    // Guardar el contenido HTML para funciones adicionales
+    window.currentReportHtml = htmlContent;
+    window.currentReportDocument = documento;
+}
+
+// Función para descargar el reporte desde el modal
+function descargarReporteDesdeModal() {
+    if (window.currentReportHtml) {
+        // Crear un elemento temporal para generar el PDF
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = window.currentReportHtml;
+        tempDiv.style.position = 'absolute';
+        tempDiv.style.left = '-9999px';
+        document.body.appendChild(tempDiv);
+        
+        // Usar html2pdf para generar y descargar
+        const elemento = tempDiv.querySelector('.reporte-container');
+        if (elemento) {
+            const opciones = {
+                margin: [8, 8, 8, 8],
+                filename: `reporte_individual_${window.currentReportDocument}_${new Date().toISOString().split('T')[0]}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 1.8,
+                    useCORS: true,
+                    letterRendering: true,
+                    logging: false,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff'
+                },
+                jsPDF: { 
+                    unit: 'mm', 
+                    format: 'a4', 
+                    orientation: 'portrait',
+                    compress: true
+                }
+            };
+            
+            // Ocultar botones antes de generar PDF
+            const actionsSection = elemento.querySelector('.actions-section');
+            if (actionsSection) actionsSection.style.display = 'none';
+            
+            html2pdf().set(opciones).from(elemento).save().then(() => {
+                document.body.removeChild(tempDiv);
+                console.log('✅ PDF descargado exitosamente desde el modal');
+            }).catch(error => {
+                console.error('❌ Error al generar PDF:', error);
+                document.body.removeChild(tempDiv);
+                alert('Error al generar el PDF. Inténtelo nuevamente.');
+            });
+        }
+    }
+}
+
+// Función para intentar abrir en nueva ventana desde el modal
+function abrirReporteEnNuevaVentana() {
+    if (window.currentReportHtml) {
+        const reporteWindow = window.open('', '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+        
+        if (!reporteWindow || reporteWindow.closed || typeof reporteWindow.closed === 'undefined') {
+            alert('Las ventanas emergentes están bloqueadas en tu navegador. Por favor, habilítalas para esta función o usa la opción "Descargar PDF".');
+        } else {
+            reporteWindow.document.write(window.currentReportHtml);
+            reporteWindow.document.close();
+            // Cerrar el modal actual
+            const modal = bootstrap.Modal.getInstance(document.getElementById('reporteModal'));
+            modal.hide();
+        }
+    }
+}
+
 // Función para generar reporte consolidado
 window.generarReporteConsolidado = async function() {
     const formato = document.querySelector('input[name="formatoConsolidado"]:checked').value;
@@ -1606,18 +1767,32 @@ window.generarReporteConsolidado = async function() {
     console.log(`📊 Generando reporte consolidado en formato: ${formato}`);
     
     try {
+        console.log('🔄 Iniciando carga de datos...');
         // Cargar estudiantes e incentivos en paralelo
         const [estudiantesResponse, incentivosResponse] = await Promise.all([
             fetch('/api/resultados'),
             fetch('/api/incentivos/asignaciones')
         ]);
         
-        if (!estudiantesResponse.ok) throw new Error('Error al cargar estudiantes');
+        console.log('📊 Respuestas recibidas:', {
+            estudiantesOk: estudiantesResponse.ok,
+            incentivosOk: incentivosResponse.ok
+        });
         
+        if (!estudiantesResponse.ok) throw new Error('Error al cargar estudiantes');
+        if (!incentivosResponse.ok) throw new Error('Error al cargar incentivos');
+        
+        console.log('📋 Parseando respuestas JSON...');
         const estudiantes = await estudiantesResponse.json();
         const todosLosIncentivos = await incentivosResponse.json();
         
+        console.log('📈 Datos cargados:', {
+            totalEstudiantes: estudiantes.length,
+            totalIncentivos: todosLosIncentivos.length
+        });
+        
         // Crear mapa de incentivos por estudiante
+        console.log('🗂️ Organizando incentivos por estudiante...');
         const incentivosPorEstudiante = {};
         todosLosIncentivos.forEach(incentivo => {
             if (!incentivosPorEstudiante[incentivo.documentoEstudiante]) {
@@ -1627,17 +1802,24 @@ window.generarReporteConsolidado = async function() {
         });
         
         // Agregar información de incentivos a cada estudiante
+        console.log('🔗 Combinando datos de estudiantes e incentivos...');
         const estudiantesConIncentivos = estudiantes.map(est => ({
             ...est,
             incentivos: incentivosPorEstudiante[est.documento] || [],
             tieneIncentivos: (incentivosPorEstudiante[est.documento] || []).length > 0
         }));
         
+        console.log('✅ Datos procesados correctamente. Generando reporte...');
+        
         if (formato === 'pdf') {
-            generarPDFConsolidado(estudiantesConIncentivos);
+            console.log('📄 Llamando a generarPDFConsolidado...');
+            await generarPDFConsolidado(estudiantesConIncentivos);
         } else {
-            generarExcelConsolidado(estudiantesConIncentivos);
+            console.log('📊 Llamando a generarExcelConsolidado...');
+            await generarExcelConsolidado(estudiantesConIncentivos);
         }
+        
+        console.log('🎉 Reporte consolidado generado exitosamente');
         
         // Actualizar último reporte generado
         document.getElementById('ultimoReporte').textContent = 
@@ -1645,7 +1827,12 @@ window.generarReporteConsolidado = async function() {
         
     } catch (error) {
         console.error('❌ Error al generar reporte consolidado:', error);
-        alert('Error al generar el reporte consolidado');
+        console.error('📋 Detalles del error:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+        });
+        alert('❌ Error al generar el reporte consolidado: ' + error.message);
     }
 };
 
@@ -1709,14 +1896,30 @@ function filtrarEstudiantesPorCriterio(estudiantes, criterio) {
 
 // Función para generar PDF consolidado
 function generarPDFConsolidado(estudiantes) {
-    const total = estudiantes.length;
-    const puedenGraduar = estudiantes.filter(est => (est.puntajeGlobal || 0) >= 80).length;
+    console.log('📄 [PDF] Iniciando generación de PDF consolidado...');
+    console.log('📄 [PDF] Total de estudiantes recibidos:', estudiantes.length);
+    
+    try {
+        const total = estudiantes.length;
+        const puedenGraduar = estudiantes.filter(est => (est.puntajeGlobal || 0) >= 80).length;
     const conIncentivos = estudiantes.filter(est => est.tieneIncentivos).length;
     const promedioGeneral = total > 0 
         ? (estudiantes.reduce((sum, est) => sum + (est.puntajeGlobal || 0), 0) / total).toFixed(1)
         : 0;
     
+    console.log('📄 [PDF] Intentando abrir ventana para reporte...');
     const ventanaReporte = window.open('', '_blank');
+    
+    // Verificar si la ventana fue bloqueada por el popup blocker
+    if (!ventanaReporte || ventanaReporte.closed || typeof ventanaReporte.closed == 'undefined') {
+        console.log('🚫 [PDF] Ventana emergente bloqueada, usando modal...');
+        // Generar el HTML y mostrarlo en modal
+        const htmlContent = generarHTMLReporteConsolidado(estudiantes, conIncentivos, promedioGeneral);
+        mostrarReporteConsolidadoEnModal(htmlContent);
+        return;
+    }
+    
+    console.log('✅ [PDF] Ventana abierta exitosamente, generando contenido...');
     ventanaReporte.document.write(`
         <!DOCTYPE html>
         <html>
@@ -1936,6 +2139,12 @@ function generarPDFConsolidado(estudiantes) {
         </body>
         </html>
     `);
+        
+        console.log('✅ [PDF] PDF consolidado generado exitosamente');
+    } catch (error) {
+        console.error('❌ [PDF] Error al generar PDF consolidado:', error);
+        throw error;
+    }
 }
 
 // Función para generar PDF por criterio
@@ -2133,15 +2342,245 @@ function generarPDFPorCriterio(estudiantes, criterio) {
     `);
 }
 
+// Función para generar HTML del reporte consolidado para modal
+function generarHTMLReporteConsolidado(estudiantes, conIncentivos, promedioGeneral) {
+    console.log('🎨 [HTML] Generando HTML para reporte consolidado...');
+    
+    const total = estudiantes.length;
+    const puedenGraduar = estudiantes.filter(est => (est.puntajeGlobal || 0) >= 80).length;
+    
+    let tablaEstudiantes = '';
+    estudiantes.forEach((est, index) => {
+        const nombreCompleto = `${est.primerNombre || ''} ${est.segundoNombre || ''} ${est.primerApellido || ''} ${est.segundoApellido || ''}`.trim();
+        const puntaje = est.puntajeGlobal || 0;
+        const puedeGraduar = puntaje >= 80;
+        const estadoClase = puedeGraduar ? 'text-success' : 'text-warning';
+        const iconoEstado = puedeGraduar ? 'fa-check-circle' : 'fa-exclamation-triangle';
+        
+        tablaEstudiantes += `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${est.documento || 'N/A'}</td>
+                <td>${nombreCompleto}</td>
+                <td>${est.programaAcademico || 'N/A'}</td>
+                <td class="text-center ${estadoClase}"><strong>${puntaje}</strong></td>
+                <td class="text-center">
+                    <i class="fas ${iconoEstado} ${estadoClase}"></i>
+                    <span class="${estadoClase}">${puedeGraduar ? 'Sí' : 'No'}</span>
+                </td>
+                <td class="text-center">
+                    <i class="fas ${est.tieneIncentivos ? 'fa-check text-success' : 'fa-times text-muted'}"></i>
+                    <span class="${est.tieneIncentivos ? 'text-success' : 'text-muted'}">${est.tieneIncentivos ? 'Sí' : 'No'}</span>
+                </td>
+                <td>${est.correoElectronico || 'N/A'}</td>
+                <td>${est.numeroTelefono || 'N/A'}</td>
+            </tr>
+        `;
+    });
+
+    return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Reporte Consolidado SABER PRO</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+            <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 0; padding: 20px; font-size: 12px; background: #f8f9fa; }
+                .header { text-align: center; margin-bottom: 30px; }
+                .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+                .stat-card { background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #0d6efd; }
+                .table-container { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+                table { width: 100%; font-size: 11px; }
+                th { background: #0d6efd; color: white; padding: 10px 8px; }
+                td { padding: 8px; border-bottom: 1px solid #dee2e6; }
+                .actions-section { text-align: center; margin: 20px 0; }
+                .btn { padding: 10px 20px; margin: 0 5px; border: none; border-radius: 5px; cursor: pointer; }
+                .btn-primary { background: #0d6efd; color: white; }
+                .btn-secondary { background: #6c757d; color: white; }
+                @media print { .actions-section { display: none; } }
+                @page { margin: 1cm; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1><i class="fas fa-chart-bar text-primary"></i> Reporte Consolidado SABER PRO</h1>
+                <h4 class="text-muted">Universidad - Resultados Académicos</h4>
+                <p class="text-muted">Generado el ${new Date().toLocaleDateString('es-CO')}</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h5><i class="fas fa-users text-primary"></i> Total de Estudiantes</h5>
+                    <h2 class="text-primary">${total}</h2>
+                </div>
+                <div class="stat-card">
+                    <h5><i class="fas fa-graduation-cap text-success"></i> Pueden Graduarse</h5>
+                    <h2 class="text-success">${puedenGraduar}</h2>
+                    <small class="text-muted">${((puedenGraduar/total)*100).toFixed(1)}% del total</small>
+                </div>
+                <div class="stat-card">
+                    <h5><i class="fas fa-trophy text-warning"></i> Con Incentivos</h5>
+                    <h2 class="text-warning">${conIncentivos}</h2>
+                    <small class="text-muted">${((conIncentivos/total)*100).toFixed(1)}% del total</small>
+                </div>
+                <div class="stat-card">
+                    <h5><i class="fas fa-chart-line text-info"></i> Promedio General</h5>
+                    <h2 class="text-info">${promedioGeneral}</h2>
+                    <small class="text-muted">Puntos SABER PRO</small>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Documento</th>
+                            <th>Nombre Completo</th>
+                            <th>Programa</th>
+                            <th>Puntaje Global</th>
+                            <th>Puede Graduarse</th>
+                            <th>Con Incentivos</th>
+                            <th>Correo</th>
+                            <th>Teléfono</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tablaEstudiantes}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="actions-section">
+                <button class="btn btn-primary" onclick="generarPDF()">
+                    <i class="fas fa-file-pdf"></i> Descargar PDF
+                </button>
+                <button class="btn btn-secondary" onclick="window.print()">
+                    <i class="fas fa-print"></i> Imprimir
+                </button>
+            </div>
+
+            <script>
+                function generarPDF() {
+                    const btnDescargar = event.target;
+                    const textoOriginal = btnDescargar.innerHTML;
+                    
+                    btnDescargar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando PDF...';
+                    btnDescargar.disabled = true;
+                    document.querySelector('.actions-section').style.display = 'none';
+                    
+                    const element = document.body;
+                    const opt = {
+                        margin: [0.5, 0.5, 0.5, 0.5],
+                        filename: 'reporte_consolidado_saber_pro.pdf',
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 2, useCORS: true },
+                        jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
+                    };
+                    
+                    html2pdf().set(opt).from(element).save().then(() => {
+                        document.querySelector('.actions-section').style.display = 'block';
+                        btnDescargar.innerHTML = textoOriginal;
+                        btnDescargar.disabled = false;
+                        alert('✅ PDF generado exitosamente');
+                    }).catch(error => {
+                        console.error('Error al generar PDF:', error);
+                        document.querySelector('.actions-section').style.display = 'block';
+                        btnDescargar.innerHTML = textoOriginal;
+                        btnDescargar.disabled = false;
+                        alert('❌ Error al generar el PDF. Inténtelo nuevamente.');
+                    });
+                }
+            </script>
+        </body>
+        </html>
+    `;
+}
+
+// Función para mostrar reporte consolidado en modal
+function mostrarReporteConsolidadoEnModal(htmlContent) {
+    console.log('🖼️ [MODAL] Mostrando reporte consolidado en modal...');
+    
+    // Verificar si ya existe un modal de reporte consolidado
+    let modal = document.getElementById('modalReporteConsolidado');
+    if (!modal) {
+        // Crear el modal
+        modal = document.createElement('div');
+        modal.id = 'modalReporteConsolidado';
+        modal.className = 'modal fade';
+        modal.style.zIndex = '9999';
+        modal.innerHTML = `
+            <div class="modal-dialog modal-fullscreen">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title">
+                            <i class="fas fa-chart-bar"></i> Reporte Consolidado SABER PRO
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-0">
+                        <iframe id="iframeReporteConsolidado" style="width: 100%; height: 80vh; border: none;"></iframe>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times"></i> Cerrar
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="abrirReporteConsolidadoEnVentana()">
+                            <i class="fas fa-external-link-alt"></i> Abrir en ventana nueva
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    // Cargar el contenido en el iframe
+    const iframe = document.getElementById('iframeReporteConsolidado');
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    iframe.src = url;
+    
+    // Función global para abrir en ventana nueva
+    window.abrirReporteConsolidadoEnVentana = function() {
+        const ventana = window.open('', '_blank', 'width=1200,height=800');
+        if (ventana) {
+            ventana.document.write(htmlContent);
+            ventana.document.close();
+        } else {
+            alert('⚠️ No se pudo abrir la ventana. Verifique que no esté bloqueando ventanas emergentes.');
+        }
+    };
+    
+    // Mostrar el modal
+    const bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+    
+    console.log('✅ [MODAL] Reporte consolidado mostrado en modal');
+}
+
 // Funciones para Excel (usando SheetJS para mejor compatibilidad)
 function generarExcelConsolidado(estudiantes) {
-    // Si existe SheetJS, usar la librería para generar Excel real
-    if (typeof XLSX !== 'undefined') {
-        generarExcelRealConsolidado(estudiantes);
-    } else {
-        // Fallback a CSV con mejor codificación
-        const csvContent = generarCSVConsolidado(estudiantes);
-        descargarCSV(csvContent, 'reporte_consolidado_saber_pro.csv');
+    console.log('📊 [EXCEL] Iniciando generación de Excel consolidado...');
+    console.log('📊 [EXCEL] Total de estudiantes recibidos:', estudiantes.length);
+    
+    try {
+        // Si existe SheetJS, usar la librería para generar Excel real
+        if (typeof XLSX !== 'undefined') {
+            console.log('📊 [EXCEL] Usando SheetJS para generar Excel real...');
+            generarExcelRealConsolidado(estudiantes);
+        } else {
+            console.log('📊 [EXCEL] SheetJS no disponible, usando fallback a CSV...');
+            // Fallback a CSV con mejor codificación
+            const csvContent = generarCSVConsolidado(estudiantes);
+            descargarCSV(csvContent, 'reporte_consolidado_saber_pro.csv');
+        }
+        console.log('✅ [EXCEL] Excel consolidado generado exitosamente');
+    } catch (error) {
+        console.error('❌ [EXCEL] Error al generar Excel consolidado:', error);
+        throw error;
     }
 }
 
@@ -2158,32 +2597,47 @@ function generarExcelPorCriterio(estudiantes, criterio) {
 
 // Función para generar Excel real usando SheetJS
 function generarExcelRealConsolidado(estudiantes) {
-    const datos = [
-        ['Documento', 'Nombre Completo', 'Programa Académico', 'Puntaje Global', 'Puede Graduarse', 'Con Incentivos', 'Correo', 'Teléfono']
-    ];
+    console.log('📊 [XLSX] Creando archivo Excel real con SheetJS...');
+    console.log('📊 [XLSX] Número de estudiantes a procesar:', estudiantes.length);
     
-    estudiantes.forEach(est => {
-        const nombreCompleto = `${est.primerNombre || ''} ${est.segundoNombre || ''} ${est.primerApellido || ''} ${est.segundoApellido || ''}`.trim();
-        const puntaje = est.puntajeGlobal || 0;
-        const puedeGraduar = puntaje >= 80 ? 'Sí' : 'No';
-        const conIncentivos = est.tieneIncentivos ? 'Sí' : 'No';
+    try {
+        const datos = [
+            ['Documento', 'Nombre Completo', 'Programa Académico', 'Puntaje Global', 'Puede Graduarse', 'Con Incentivos', 'Correo', 'Teléfono']
+        ];
         
-        datos.push([
-            est.documento || '',
-            nombreCompleto,
-            est.programaAcademico || '',
-            puntaje,
-            puedeGraduar,
-            conIncentivos,
-            est.correoElectronico || '',
-            est.numeroTelefono || ''
-        ]);
-    });
-    
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.aoa_to_sheet(datos);
-    XLSX.utils.book_append_sheet(wb, ws, 'Reporte Consolidado');
-    XLSX.writeFile(wb, 'reporte_consolidado_saber_pro.xlsx');
+        console.log('📊 [XLSX] Procesando datos de estudiantes...');
+        estudiantes.forEach((est, index) => {
+            console.log(`📊 [XLSX] Procesando estudiante ${index + 1}/${estudiantes.length}:`, est.documento);
+            const nombreCompleto = `${est.primerNombre || ''} ${est.segundoNombre || ''} ${est.primerApellido || ''} ${est.segundoApellido || ''}`.trim();
+            const puntaje = est.puntajeGlobal || 0;
+            const puedeGraduar = puntaje >= 80 ? 'Sí' : 'No';
+            const conIncentivos = est.tieneIncentivos ? 'Sí' : 'No';
+            
+            datos.push([
+                est.documento || '',
+                nombreCompleto,
+                est.programaAcademico || '',
+                puntaje,
+                puedeGraduar,
+                conIncentivos,
+                est.correoElectronico || '',
+                est.numeroTelefono || ''
+            ]);
+        });
+        
+        console.log('📊 [XLSX] Datos procesados, creando workbook...');
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(datos);
+        XLSX.utils.book_append_sheet(wb, ws, 'Reporte Consolidado');
+        
+        console.log('📊 [XLSX] Generando archivo Excel...');
+        XLSX.writeFile(wb, 'reporte_consolidado_saber_pro.xlsx');
+        console.log('✅ [XLSX] Excel generado y descargado exitosamente');
+        
+    } catch (error) {
+        console.error('❌ [XLSX] Error al generar Excel real:', error);
+        throw error;
+    }
 }
 
 function generarExcelRealPorCriterio(estudiantes, criterio) {
@@ -2211,26 +2665,38 @@ function generarExcelRealPorCriterio(estudiantes, criterio) {
 }
 
 function generarCSVConsolidado(estudiantes) {
-    // Encabezados con caracteres especiales correctamente codificados
-    let csv = 'Documento,Nombre Completo,Programa Académico,Puntaje Global,Puede Graduarse,Con Incentivos,Correo,Teléfono\n';
+    console.log('📊 [CSV] Generando CSV consolidado...');
+    console.log('📊 [CSV] Número de estudiantes a procesar:', estudiantes.length);
     
-    estudiantes.forEach(est => {
-        const nombreCompleto = `${est.primerNombre || ''} ${est.segundoNombre || ''} ${est.primerApellido || ''} ${est.segundoApellido || ''}`.trim();
-        const puntaje = est.puntajeGlobal || 0;
-        const puedeGraduar = puntaje >= 80 ? 'Sí' : 'No';
-        const conIncentivos = est.tieneIncentivos ? 'Sí' : 'No';
+    try {
+        // Encabezados con caracteres especiales correctamente codificados
+        let csv = 'Documento,Nombre Completo,Programa Académico,Puntaje Global,Puede Graduarse,Con Incentivos,Correo,Teléfono\n';
         
-        // Limpiar y normalizar los datos para evitar problemas de codificación
-        const documento = String(est.documento || '').replace(/"/g, '""');
-        const nombre = String(nombreCompleto).replace(/"/g, '""');
-        const programa = String(est.programaAcademico || '').replace(/"/g, '""');
-        const correo = String(est.correoElectronico || '').replace(/"/g, '""');
-        const telefono = String(est.numeroTelefono || '').replace(/"/g, '""');
+        console.log('📊 [CSV] Procesando datos de estudiantes...');
+        estudiantes.forEach((est, index) => {
+            console.log(`📊 [CSV] Procesando estudiante ${index + 1}/${estudiantes.length}:`, est.documento);
+            const nombreCompleto = `${est.primerNombre || ''} ${est.segundoNombre || ''} ${est.primerApellido || ''} ${est.segundoApellido || ''}`.trim();
+            const puntaje = est.puntajeGlobal || 0;
+            const puedeGraduar = puntaje >= 80 ? 'Sí' : 'No';
+            const conIncentivos = est.tieneIncentivos ? 'Sí' : 'No';
+            
+            // Limpiar y normalizar los datos para evitar problemas de codificación
+            const documento = String(est.documento || '').replace(/"/g, '""');
+            const nombre = String(nombreCompleto).replace(/"/g, '""');
+            const programa = String(est.programaAcademico || '').replace(/"/g, '""');
+            const correo = String(est.correoElectronico || '').replace(/"/g, '""');
+            const telefono = String(est.numeroTelefono || '').replace(/"/g, '""');
+            
+            csv += `"${documento}","${nombre}","${programa}","${puntaje}","${puedeGraduar}","${conIncentivos}","${correo}","${telefono}"\n`;
+        });
         
-        csv += `"${documento}","${nombre}","${programa}","${puntaje}","${puedeGraduar}","${conIncentivos}","${correo}","${telefono}"\n`;
-    });
-    
-    return csv;
+        console.log('📊 [CSV] CSV generado exitosamente. Tamaño:', csv.length, 'caracteres');
+        return csv;
+        
+    } catch (error) {
+        console.error('❌ [CSV] Error al generar CSV:', error);
+        throw error;
+    }
 }
 
 function generarCSVPorCriterio(estudiantes, criterio) {
@@ -6087,11 +6553,12 @@ window.marcarEntregado = marcarEntregado;
 window.verDetalleAsignacion = verDetalleAsignacion;
 window.editarTipoIncentivo = editarTipoIncentivo;
 window.eliminarTipoIncentivo = eliminarTipoIncentivo;
-window.nuevoTipoIncentivo = nuevoTipoIncentivo;
 window.crearNuevoTipoIncentivo = crearNuevoTipoIncentivo;
-window.guardarTipoIncentivo = guardarTipoIncentivo;
 window.cambiarEstadoTipo = cambiarEstadoTipo;
 window.reevaluarEstudiantes = reevaluarEstudiantes;
 window.filtrarAsignaciones = filtrarAsignaciones;
+window.mostrarReporteEnModal = mostrarReporteEnModal;
+window.descargarReporteDesdeModal = descargarReporteDesdeModal;
+window.abrirReporteEnNuevaVentana = abrirReporteEnNuevaVentana;
 
 console.log('🌐 Funciones de incentivos expuestas globalmente');
