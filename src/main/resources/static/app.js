@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const documento = document.getElementById('documento').value;
             const password = document.getElementById('password').value;
 
-            const res = await fetch('http://localhost:8081/auth/login', {
+            const res = await fetch('/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ documento, password })
@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (sessionStorage.getItem('rol') !== 'ESTUDIANTE') window.location = 'index.html';
         const doc = sessionStorage.getItem('documento');
 
-        fetch(`http://localhost:8081/api/estudiantes/resultado/${doc}`)
+        fetch(`/api/estudiantes/resultado/${doc}`)
             .then(res => res.json())
             .then(data => {
                 const incentivosEl = document.getElementById('estadoIncentivos');
@@ -130,14 +130,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (sessionStorage.getItem('rol') !== 'COORDINADOR') window.location = 'index.html';
 
         // Mensaje de bienvenida
-        fetch('http://localhost:8081/api/coordinador/test')
+        fetch('/api/coordinador/test')
             .then(res => res.json())
             .then(data => {
                 document.getElementById('mensajeCoordinador').innerText = data.mensaje;
             });
 
         // ----- Variables globales -----
-        const API_URL = 'http://localhost:8081/api/estudiantes';
+        const API_URL = '/api/estudiantes';
         const tabla = document.getElementById('tablaEstudiantes');
         const form = document.getElementById('formEstudiante');
         let estudianteSeleccionado = null;

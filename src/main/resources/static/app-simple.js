@@ -72,7 +72,7 @@ window.editarEstudiante = async function(documento) {
     
     try {
         // Hacer petición al servidor
-        const response = await fetch(`http://localhost:8081/api/resultados/${documento}`);
+        const response = await fetch(`/api/resultados/${documento}`);
         const estudiante = await response.json();
         
         console.log('📡 Estudiante recibido:', estudiante);
@@ -222,8 +222,8 @@ window.guardarEstudiante = async function() {
         // Determinar si es crear o actualizar
         const isEdit = document.getElementById('documento').disabled;
         const url = isEdit 
-            ? `http://localhost:8081/api/resultados/${formData.documento}`
-            : 'http://localhost:8081/api/resultados';
+            ? `/api/resultados/${formData.documento}`
+            : '/api/resultados';
         const method = isEdit ? 'PUT' : 'POST';
         
         // 🎯 Detectar cambio en puntaje global para reevaluación automática
@@ -287,7 +287,7 @@ window.eliminarEstudiante = async function(documento) {
     console.log('🗑️ Eliminando estudiante:', documento);
     
     try {
-        const response = await fetch(`http://localhost:8081/api/resultados/${documento}`, {
+        const response = await fetch(`/api/resultados/${documento}`, {
             method: 'DELETE'
         });
         
@@ -315,8 +315,8 @@ window.verEstudiante = async function(documento) {
     try {
         // Cargar datos del estudiante e incentivos en paralelo
         const [estudianteResponse, incentivosResponse] = await Promise.all([
-            fetch(`http://localhost:8081/api/resultados/${documento}`),
-            fetch(`http://localhost:8081/api/incentivos/asignaciones`)
+            fetch(`/api/resultados/${documento}`),
+            fetch(`/api/incentivos/asignaciones`)
         ]);
         
         const estudiante = await estudianteResponse.json();
@@ -848,8 +848,8 @@ async function cargarEstudiantes() {
     try {
         // Cargar estudiantes y sus incentivos en paralelo
         const [estudiantesResponse, incentivosResponse] = await Promise.all([
-            fetch('http://localhost:8081/api/resultados'),
-            fetch('http://localhost:8081/api/incentivos/asignaciones')
+            fetch('/api/resultados'),
+            fetch('/api/incentivos/asignaciones')
         ]);
         
         const estudiantes = await estudiantesResponse.json();
@@ -1114,7 +1114,7 @@ window.procesarImportacion = async function() {
         formData.append('archivo', file);
         
         // Enviar archivo al backend
-        const response = await fetch('http://localhost:8081/api/resultados/importar', {
+        const response = await fetch('/api/resultados/importar', {
             method: 'POST',
             body: formData
         });
@@ -1166,8 +1166,8 @@ async function cargarDashboard() {
     try {
         // Cargar estudiantes y sus incentivos en paralelo
         const [estudiantesResponse, incentivosResponse] = await Promise.all([
-            fetch('http://localhost:8081/api/resultados'),
-            fetch('http://localhost:8081/api/incentivos/asignaciones')
+            fetch('/api/resultados'),
+            fetch('/api/incentivos/asignaciones')
         ]);
         
         if (!estudiantesResponse.ok) {
@@ -1423,7 +1423,7 @@ async function cargarReportes() {
 // Función para cargar estudiantes en el selector
 async function cargarEstudiantesParaReporte() {
     try {
-        const response = await fetch('http://localhost:8081/api/resultados');
+        const response = await fetch('/api/resultados');
         if (!response.ok) throw new Error('Error al cargar estudiantes');
         
         const estudiantes = await response.json();
@@ -1450,8 +1450,8 @@ async function cargarEstadisticasReportes() {
     try {
         // Cargar estudiantes y sus incentivos en paralelo
         const [estudiantesResponse, incentivosResponse] = await Promise.all([
-            fetch('http://localhost:8081/api/resultados'),
-            fetch('http://localhost:8081/api/incentivos/asignaciones')
+            fetch('/api/resultados'),
+            fetch('/api/incentivos/asignaciones')
         ]);
         
         if (!estudiantesResponse.ok) throw new Error('Error al cargar datos');
@@ -1514,8 +1514,8 @@ window.generarReporteIndividual = async function() {
     try {
         // Obtener estudiantes e incentivos en paralelo
         const [estudiantesResponse, incentivosResponse] = await Promise.all([
-            fetch('http://localhost:8081/api/resultados'),
-            fetch('http://localhost:8081/api/incentivos/asignaciones')
+            fetch('/api/resultados'),
+            fetch('/api/incentivos/asignaciones')
         ]);
         
         if (!estudiantesResponse.ok) throw new Error('Error al cargar estudiantes');
@@ -1608,8 +1608,8 @@ window.generarReporteConsolidado = async function() {
     try {
         // Cargar estudiantes e incentivos en paralelo
         const [estudiantesResponse, incentivosResponse] = await Promise.all([
-            fetch('http://localhost:8081/api/resultados'),
-            fetch('http://localhost:8081/api/incentivos/asignaciones')
+            fetch('/api/resultados'),
+            fetch('/api/incentivos/asignaciones')
         ]);
         
         if (!estudiantesResponse.ok) throw new Error('Error al cargar estudiantes');
@@ -1657,7 +1657,7 @@ window.generarReportePorCriterio = async function() {
     console.log(`🔍 Generando reporte por criterio: ${criterio} en formato: ${formato}`);
     
     try {
-        const response = await fetch('http://localhost:8081/api/resultados');
+        const response = await fetch('/api/resultados');
         if (!response.ok) throw new Error('Error al cargar estudiantes');
         
         const todosEstudiantes = await response.json();
@@ -3998,7 +3998,7 @@ async function eliminarIncentivo(id) {
     
     try {
         console.log('🗑️ Eliminando incentivo con id:', id);
-        const response = await fetch(`http://localhost:8081/api/incentivos/${id}`, {
+        const response = await fetch(`/api/incentivos/${id}`, {
             method: 'DELETE'
         });
         

@@ -7,7 +7,7 @@ console.log('🚀 app-enhanced.js cargado correctamente - INICIO');
 
 // Configuración global
 const CONFIG = {
-    API_BASE_URL: 'http://localhost:8081',
+    API_BASE_URL: '',
     ENDPOINTS: {
         LOGIN: '/auth/login',
         RESULTADOS: '/api/resultados',
