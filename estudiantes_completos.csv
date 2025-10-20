@@ -1,0 +1,11 @@
+documento,tipoDocumento,primerApellido,segundoApellido,primerNombre,segundoNombre,correoElectronico,numeroTelefono,programaAcademico,puntajeGlobal,comunicacionEscrita,razonamientoCuantitativo,lecturaCritica,competenciasCiudadanas,ingles,formulacionProyectos,disenoSoftware
+1234567890,CC,García,López,María,Elena,maria.garcia@estudiante.edu.co,3001234567,Ingeniería de Sistemas,280,75,85,80,70,90,88,92
+9876543210,CC,Rodríguez,Martínez,Carlos,Andrés,carlos.rodriguez@estudiante.edu.co,3109876543,Ingeniería de Software,195,60,65,58,62,70,75,78
+1122334455,CC,Pérez,Gómez,Ana,Sofía,ana.perez@estudiante.edu.co,3201122334,Tecnología en Sistemas,120,45,40,42,38,35,50,55
+5566778899,CC,Torres,Silva,Luis,Fernando,luis.torres@estudiante.edu.co,3155566778,Ingeniería de Sistemas,260,70,80,75,68,85,82,88
+7788990011,TI,Hernández,Ruiz,Camila,,camila.hernandez@estudiante.edu.co,3047788990,Tecnología en Desarrollo de Software,85,30,25,28,22,18,35,40
+2233445566,CC,Vargas,Morales,Diego,Alejandro,diego.vargas@estudiante.edu.co,3162233445,Ingeniería de Software,225,65,70,68,60,75,78,80
+3344556677,CE,Castro,Jiménez,Isabella,Valentina,isabella.castro@estudiante.edu.co,3173344556,Ingeniería de Sistemas,295,85,90,88,82,95,93,98
+4455667788,CC,Mendoza,Romero,Sebastián,David,sebastian.mendoza@estudiante.edu.co,3084455667,Tecnología en Informática,155,50,55,48,45,52,60,65
+6677889900,CC,Ramírez,Vega,Valeria,Andrea,valeria.ramirez@estudiante.edu.co,3196677889,Ingeniería de Sistemas,310,95,98,92,88,100,96,99
+8899001122,CC,Moreno,Salazar,Alejandro,José,alejandro.moreno@estudiante.edu.co,3058899001,Tecnología,45,15,12,18,10,8,20,25

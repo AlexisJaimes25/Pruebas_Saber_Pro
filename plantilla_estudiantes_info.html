@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plantilla Estudiantes Saber PRO</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 12px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .info {
+            background-color: #e8f4fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .download-btn {
+            background-color: #27ae60;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .download-btn:hover {
+            background-color: #229954;
+        }
+        .field-description {
+            font-size: 11px;
+            color: #666;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Plantilla para Importar Estudiantes Saber PRO</h1>
+        
+        <div class="info">
+            <h3>🔍 Instrucciones de Uso:</h3>
+            <ol>
+                <li><strong>Descarga</strong> el archivo Excel haciendo clic en el botón verde</li>
+                <li><strong>Abre</strong> el archivo en Excel</li>
+                <li><strong>Edita</strong> los datos según tus necesidades</li>
+                <li><strong>Guarda</strong> como Excel (.xlsx)</li>
+                <li><strong>Usa</strong> la función "Importar" en el sistema Saber PRO</li>
+            </ol>
+        </div>
+
+        <div style="text-align: center; margin: 20px 0;">
+            <a href="plantilla_estudiantes_saber_pro.xlsx" download="plantilla_estudiantes_saber_pro.xlsx" class="download-btn">
+                📥 Descargar Plantilla Excel (.xlsx)
+            </a>
+        </div>
+
+        <h3>📋 Vista Previa de los Datos:</h3>
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>Documento</th>
+                    <th>Tipo Doc</th>
+                    <th>Primer Apellido</th>
+                    <th>Segundo Apellido</th>
+                    <th>Primer Nombre</th>
+                    <th>Segundo Nombre</th>
+                    <th>Email</th>
+                    <th>Teléfono</th>
+                    <th>Programa</th>
+                    <th>Puntaje Global</th>
+                    <th>Com. Escrita</th>
+                    <th>Raz. Cuant.</th>
+                    <th>Lectura Crítica</th>
+                    <th>Comp. Ciudadanas</th>
+                    <th>Inglés</th>
+                    <th>Form. Proyectos</th>
+                    <th>Diseño Software</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>EK20183301001</td><td>CC</td><td>MARTINEZ</td><td>LOPEZ</td><td>ALEJANDRA</td><td>SOFIA</td><td>alejandra.martinez@uts.edu.co</td><td>3201234567</td><td>Ingeniería de Sistemas</td><td>185</td><td>156</td><td>178</td><td>192</td><td>167</td><td>188</td><td>175</td><td>162</td></tr>
+                <tr><td>EK20183301002</td><td>CC</td><td>RODRIGUEZ</td><td>GARCIA</td><td>CARLOS</td><td>ANDRES</td><td>carlos.rodriguez@uts.edu.co</td><td>3109876543</td><td>Ingeniería de Sistemas</td><td>220</td><td>198</td><td>205</td><td>210</td><td>195</td><td>225</td><td>180</td><td>195</td></tr>
+                <tr><td>EK20183301003</td><td>CC</td><td>GONZALEZ</td><td>PEREZ</td><td>MARIA</td><td>FERNANDA</td><td>maria.gonzalez@uts.edu.co</td><td>3156789012</td><td>Ingeniería de Sistemas</td><td>245</td><td>230</td><td>240</td><td>235</td><td>225</td><td>250</td><td>210</td><td>220</td></tr>
+                <tr><td>EK20183301004</td><td>CC</td><td>HERNANDEZ</td><td>SANCHEZ</td><td>JUAN</td><td>DAVID</td><td>juan.hernandez@uts.edu.co</td><td>3187654321</td><td>Ingeniería de Sistemas</td><td>165</td><td>145</td><td>170</td><td>160</td><td>155</td><td>165</td><td>150</td><td>148</td></tr>
+                <tr><td>EK20183301005</td><td>CC</td><td>VALENCIA</td><td>TORRES</td><td>ANA</td><td>LUCIA</td><td>ana.valencia@uts.edu.co</td><td>3145678901</td><td>Ingeniería de Sistemas</td><td>195</td><td>175</td><td>185</td><td>190</td><td>180</td><td>200</td><td>185</td><td>175</td></tr>
+                <tr><td>EK20183301006</td><td>CC</td><td>MORALES</td><td>CASTILLO</td><td>DIEGO</td><td>FERNANDO</td><td>diego.morales@uts.edu.co</td><td>3123456789</td><td>Ingeniería de Sistemas</td><td>142</td><td>125</td><td>135</td><td>145</td><td>140</td><td>150</td><td>138</td><td>142</td></tr>
+                <tr><td>EK20183301007</td><td>CC</td><td>JIMENEZ</td><td>RIVERA</td><td>NATALIA</td><td>ALEJANDRA</td><td>natalia.jimenez@uts.edu.co</td><td>3112345678</td><td>Ingeniería de Sistemas</td><td>205</td><td>190</td><td>200</td><td>195</td><td>185</td><td>210</td><td>195</td><td>185</td></tr>
+                <tr><td>EK20183301008</td><td>CC</td><td>VARGAS</td><td>MENDOZA</td><td>SEBASTIAN</td><td>CAMILO</td><td>sebastian.vargas@uts.edu.co</td><td>3198765432</td><td>Ingeniería de Sistemas</td><td>75</td><td>85</td><td>70</td><td>80</td><td>75</td><td>65</td><td>78</td><td>82</td></tr>
+                <tr><td>EK20183301009</td><td>CC</td><td>CASTRO</td><td>FLORES</td><td>DANIELA</td><td>PATRICIA</td><td>daniela.castro@uts.edu.co</td><td>3176543210</td><td>Ingeniería de Sistemas</td><td>158</td><td>142</td><td>155</td><td>160</td><td>148</td><td>162</td><td>145</td><td>150</td></tr>
+                <tr><td>EK20183301010</td><td>CC</td><td>RAMOS</td><td>GUTIERREZ</td><td>ANDRES</td><td>FELIPE</td><td>andres.ramos@uts.edu.co</td><td>3165432109</td><td>Ingeniería de Sistemas</td><td>178</td><td>165</td><td>172</td><td>180</td><td>170</td><td>175</td><td>168</td><td>172</td></tr>
+            </tbody>
+        </table>
+
+        <div class="field-description">
+            <h3>📝 Descripción de Campos:</h3>
+            <ul>
+                <li><strong>documento:</strong> Número de documento único del estudiante</li>
+                <li><strong>tipoDocumento:</strong> Tipo de documento (CC, TI, CE, PA)</li>
+                <li><strong>primerApellido, segundoApellido:</strong> Apellidos del estudiante</li>
+                <li><strong>primerNombre, segundoNombre:</strong> Nombres del estudiante</li>
+                <li><strong>correoElectronico:</strong> Email institucional o personal</li>
+                <li><strong>numeroTelefono:</strong> Número de contacto</li>
+                <li><strong>programaAcademico:</strong> Carrera que estudia</li>
+                <li><strong>puntajeGlobal:</strong> Puntaje total Saber PRO (0-300)</li>
+                <li><strong>comunicacionEscrita:</strong> Puntaje competencia genérica (0-300)</li>
+                <li><strong>razonamientoCuantitativo:</strong> Puntaje competencia genérica (0-300)</li>
+                <li><strong>lecturaCritica:</strong> Puntaje competencia genérica (0-300)</li>
+                <li><strong>competenciasCiudadanas:</strong> Puntaje competencia genérica (0-300)</li>
+                <li><strong>ingles:</strong> Puntaje competencia genérica (0-300)</li>
+                <li><strong>formulacionProyectosIngenieria:</strong> Puntaje competencia específica (0-300)</li>
+                <li><strong>disenoSoftware:</strong> Puntaje competencia específica (0-300)</li>
+            </ul>
+        </div>
+
+        <div class="info">
+            <h3>⚠️ Notas Importantes:</h3>
+            <ul>
+                <li><strong>Formato:</strong> Todos los puntajes deben ser números enteros entre 0 y 300</li>
+                <li><strong>Documentos únicos:</strong> No puede haber documentos duplicados</li>
+                <li><strong>Campos obligatorios:</strong> documento, primerNombre, primerApellido, programaAcademico</li>
+                <li><strong>Incentivos:</strong> Se calculan automáticamente según puntajeGlobal</li>
+                <li><strong>Estado graduación:</strong> Se determina automáticamente (≥80 puntos)</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

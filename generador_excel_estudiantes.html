@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Excel - Estudiantes Saber Pro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .btn { padding: 15px 30px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        .btn:hover { background: #0056b3; }
+        .info { background: #e7f3ff; padding: 20px; border-radius: 5px; margin: 20px 0; }
+        .data-preview { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; font-family: monospace; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 Generador de Excel - Estudiantes Saber Pro</h1>
+        
+        <div class="info">
+            <h3>📋 Información del Archivo</h3>
+            <p><strong>Propósito:</strong> Archivo completo con datos de estudiantes para pruebas del sistema de incentivos</p>
+            <p><strong>Campos incluidos:</strong> Todos los campos requeridos por el modal de gestión de estudiantes</p>
+            <p><strong>Estudiantes:</strong> 10 registros con variedad en puntajes para probar diferentes niveles de incentivos</p>
+        </div>
+
+        <button class="btn" onclick="generarExcel()">📊 Generar Archivo Excel</button>
+
+        <div class="data-preview">
+            <h4>Vista previa de datos:</h4>
+            <div id="preview"></div>
+        </div>
+    </div>
+
+    <script>
+        // Datos completos de estudiantes con variedad en puntajes
+        const estudiantes = [
+            {
+                documento: "1234567890",
+                tipoDocumento: "CC",
+                primerApellido: "García",
+                segundoApellido: "López",
+                primerNombre: "María",
+                segundoNombre: "Elena",
+                correoElectronico: "maria.garcia@estudiante.edu.co",
+                numeroTelefono: "3001234567",
+                programaAcademico: "Ingeniería de Sistemas",
+                puntajeGlobal: 280,
+                comunicacionEscrita: 75,
+                razonamientoCuantitativo: 85,
+                lecturaCritica: 80,
+                competenciasCiudadanas: 70,
+                ingles: 90,
+                formulacionProyectos: 88,
+                disenoSoftware: 92
+            },
+            {
+                documento: "9876543210",
+                tipoDocumento: "CC",
+                primerApellido: "Rodríguez",
+                segundoApellido: "Martínez",
+                primerNombre: "Carlos",
+                segundoNombre: "Andrés",
+                correoElectronico: "carlos.rodriguez@estudiante.edu.co",
+                numeroTelefono: "3109876543",
+                programaAcademico: "Ingeniería de Software",
+                puntajeGlobal: 195,
+                comunicacionEscrita: 60,
+                razonamientoCuantitativo: 65,
+                lecturaCritica: 58,
+                competenciasCiudadanas: 62,
+                ingles: 70,
+                formulacionProyectos: 75,
+                disenoSoftware: 78
+            },
+            {
+                documento: "1122334455",
+                tipoDocumento: "CC",
+                primerApellido: "Pérez",
+                segundoApellido: "Gómez",
+                primerNombre: "Ana",
+                segundoNombre: "Sofía",
+                correoElectronico: "ana.perez@estudiante.edu.co",
+                numeroTelefono: "3201122334",
+                programaAcademico: "Tecnología en Sistemas",
+                puntajeGlobal: 120,
+                comunicacionEscrita: 45,
+                razonamientoCuantitativo: 40,
+                lecturaCritica: 42,
+                competenciasCiudadanas: 38,
+                ingles: 35,
+                formulacionProyectos: 50,
+                disenoSoftware: 55
+            },
+            {
+                documento: "5566778899",
+                tipoDocumento: "CC",
+                primerApellido: "Torres",
+                segundoApellido: "Silva",
+                primerNombre: "Luis",
+                segundoNombre: "Fernando",
+                correoElectronico: "luis.torres@estudiante.edu.co",
+                numeroTelefono: "3155566778",
+                programaAcademico: "Ingeniería de Sistemas",
+                puntajeGlobal: 260,
+                comunicacionEscrita: 70,
+                razonamientoCuantitativo: 80,
+                lecturaCritica: 75,
+                competenciasCiudadanas: 68,
+                ingles: 85,
+                formulacionProyectos: 82,
+                disenoSoftware: 88
+            },
+            {
+                documento: "7788990011",
+                tipoDocumento: "TI",
+                primerApellido: "Hernández",
+                segundoApellido: "Ruiz",
+                primerNombre: "Camila",
+                segundoNombre: "",
+                correoElectronico: "camila.hernandez@estudiante.edu.co",
+                numeroTelefono: "3047788990",
+                programaAcademico: "Tecnología en Desarrollo de Software",
+                puntajeGlobal: 85,
+                comunicacionEscrita: 30,
+                razonamientoCuantitativo: 25,
+                lecturaCritica: 28,
+                competenciasCiudadanas: 22,
+                ingles: 18,
+                formulacionProyectos: 35,
+                disenoSoftware: 40
+            },
+            {
+                documento: "2233445566",
+                tipoDocumento: "CC",
+                primerApellido: "Vargas",
+                segundoApellido: "Morales",
+                primerNombre: "Diego",
+                segundoNombre: "Alejandro",
+                correoElectronico: "diego.vargas@estudiante.edu.co",
+                numeroTelefono: "3162233445",
+                programaAcademico: "Ingeniería de Software",
+                puntajeGlobal: 225,
+                comunicacionEscrita: 65,
+                razonamientoCuantitativo: 70,
+                lecturaCritica: 68,
+                competenciasCiudadanas: 60,
+                ingles: 75,
+                formulacionProyectos: 78,
+                disenoSoftware: 80
+            },
+            {
+                documento: "3344556677",
+                tipoDocumento: "CE",
+                primerApellido: "Castro",
+                segundoApellido: "Jiménez",
+                primerNombre: "Isabella",
+                segundoNombre: "Valentina",
+                correoElectronico: "isabella.castro@estudiante.edu.co",
+                numeroTelefono: "3173344556",
+                programaAcademico: "Ingeniería de Sistemas",
+                puntajeGlobal: 295,
+                comunicacionEscrita: 85,
+                razonamientoCuantitativo: 90,
+                lecturaCritica: 88,
+                competenciasCiudadanas: 82,
+                ingles: 95,
+                formulacionProyectos: 93,
+                disenoSoftware: 98
+            },
+            {
+                documento: "4455667788",
+                tipoDocumento: "CC",
+                primerApellido: "Mendoza",
+                segundoApellido: "Romero",
+                primerNombre: "Sebastián",
+                segundoNombre: "David",
+                correoElectronico: "sebastian.mendoza@estudiante.edu.co",
+                numeroTelefono: "3084455667",
+                programaAcademico: "Tecnología en Informática",
+                puntajeGlobal: 155,
+                comunicacionEscrita: 50,
+                razonamientoCuantitativo: 55,
+                lecturaCritica: 48,
+                competenciasCiudadanas: 45,
+                ingles: 52,
+                formulacionProyectos: 60,
+                disenoSoftware: 65
+            },
+            {
+                documento: "6677889900",
+                tipoDocumento: "CC",
+                primerApellido: "Ramírez",
+                segundoApellido: "Vega",
+                primerNombre: "Valeria",
+                segundoNombre: "Andrea",
+                correoElectronico: "valeria.ramirez@estudiante.edu.co",
+                numeroTelefono: "3196677889",
+                programaAcademico: "Ingeniería de Sistemas",
+                puntajeGlobal: 310,
+                comunicacionEscrita: 95,
+                razonamientoCuantitativo: 98,
+                lecturaCritica: 92,
+                competenciasCiudadanas: 88,
+                ingles: 100,
+                formulacionProyectos: 96,
+                disenoSoftware: 99
+            },
+            {
+                documento: "8899001122",
+                tipoDocumento: "CC",
+                primerApellido: "Moreno",
+                segundoApellido: "Salazar",
+                primerNombre: "Alejandro",
+                segundoNombre: "José",
+                correoElectronico: "alejandro.moreno@estudiante.edu.co",
+                numeroTelefono: "3058899001",
+                programaAcademico: "Tecnología",
+                puntajeGlobal: 45,
+                comunicacionEscrita: 15,
+                razonamientoCuantitativo: 12,
+                lecturaCritica: 18,
+                competenciasCiudadanas: 10,
+                ingles: 8,
+                formulacionProyectos: 20,
+                disenoSoftware: 25
+            }
+        ];
+
+        function generarExcel() {
+            // Crear libro de trabajo
+            const workbook = XLSX.utils.book_new();
+            
+            // Crear hoja de trabajo con los datos
+            const worksheet = XLSX.utils.json_to_sheet(estudiantes);
+            
+            // Configurar anchos de columna
+            const cols = [
+                { width: 12 }, // documento
+                { width: 15 }, // tipoDocumento
+                { width: 15 }, // primerApellido
+                { width: 15 }, // segundoApellido
+                { width: 15 }, // primerNombre
+                { width: 15 }, // segundoNombre
+                { width: 30 }, // correoElectronico
+                { width: 15 }, // numeroTelefono
+                { width: 25 }, // programaAcademico
+                { width: 12 }, // puntajeGlobal
+                { width: 18 }, // comunicacionEscrita
+                { width: 22 }, // razonamientoCuantitativo
+                { width: 15 }, // lecturaCritica
+                { width: 20 }, // competenciasCiudadanas
+                { width: 10 }, // ingles
+                { width: 20 }, // formulacionProyectos
+                { width: 15 }  // disenoSoftware
+            ];
+            worksheet['!cols'] = cols;
+            
+            // Agregar la hoja al libro
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Estudiantes");
+            
+            // Guardar el archivo
+            XLSX.writeFile(workbook, "plantilla_estudiantes_saber_pro_completa.xlsx");
+            
+            alert("✅ Archivo Excel generado exitosamente!\n\n📁 Nombre: plantilla_estudiantes_saber_pro_completa.xlsx\n📊 Registros: " + estudiantes.length + " estudiantes\n🎯 Incluye todos los campos del modal");
+        }
+
+        // Mostrar vista previa
+        function mostrarPreview() {
+            const preview = document.getElementById('preview');
+            preview.innerHTML = `
+                <strong>Total de estudiantes:</strong> ${estudiantes.length}<br>
+                <strong>Ejemplo de registro:</strong><br>
+                ${JSON.stringify(estudiantes[0], null, 2)}
+                <br><br>
+                <strong>Distribución de puntajes:</strong><br>
+                • Excelentes (280+): ${estudiantes.filter(e => e.puntajeGlobal >= 280).length} estudiantes<br>
+                • Buenos (200-279): ${estudiantes.filter(e => e.puntajeGlobal >= 200 && e.puntajeGlobal < 280).length} estudiantes<br>
+                • Regulares (100-199): ${estudiantes.filter(e => e.puntajeGlobal >= 100 && e.puntajeGlobal < 200).length} estudiantes<br>
+                • Bajos (<100): ${estudiantes.filter(e => e.puntajeGlobal < 100).length} estudiantes
+            `;
+        }
+
+        // Mostrar preview al cargar
+        window.onload = mostrarPreview;
+    </script>
+</body>
+</html>

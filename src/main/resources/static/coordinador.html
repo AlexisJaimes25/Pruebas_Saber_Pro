@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Coordinador - Saber Pro UTS</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .navbar {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .navbar-brand {
+        color: white !important;
+        font-weight: bold;
+        font-size: 1.5rem;
+    }
+    .sidebar {
+        background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+        min-height: calc(100vh - 56px);
+        box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        position: sticky;
+        top: 56px;
+    }
+    .nav-link {
+        color: #495057;
+        border-radius: 10px;
+        margin: 0.2rem 0;
+        transition: all 0.3s ease;
+    }
+    .nav-link:hover, .nav-link.active {
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        color: white !important;
+        transform: translateX(5px);
+    }
+    .card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        backdrop-filter: blur(10px);
+        background: rgba(255,255,255,0.9);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    .card-header {
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        color: white;
+        border-radius: 20px 20px 0 0 !important;
+        border: none;
+    }
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-align: center;
+        padding: 2rem;
+    }
+    .stat-number {
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    .content-section {
+        display: none;
+    }
+    .content-section.active {
+        display: block;
+    }
+    .table {
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    .btn-modern {
+        border-radius: 25px;
+        padding: 0.5rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-modern:hover {
+        transform: translateY(-2px);
+    }
+    .search-container {
+        background: white;
+        border-radius: 50px;
+        padding: 0.5rem 1rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .alert-modern {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .modal-content {
+        border-radius: 20px;
+        border: none;
+    }
+    .modal-header {
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        color: white;
+        border-radius: 20px 20px 0 0;
+    }
+    .form-floating input, .form-floating select {
+        border-radius: 15px;
+        border: 2px solid #e0e0e0;
+    }
+    .form-floating input:focus, .form-floating select:focus {
+        border-color: #4CAF50;
+        box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+    }
+    
+    /* Estilos específicos para el modal de detalles */
+    .modal-xl {
+        max-width: 90%;
+    }
+    
+    .competencias-container .competencia-item {
+        background: rgba(255,255,255,0.8);
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .competencias-container .competencia-item:hover {
+        background: rgba(255,255,255,1);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transform: translateY(-1px);
+    }
+    
+    .competencia-nombre {
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.9rem;
+    }
+    
+    .competencia-puntaje {
+        font-size: 1.1rem;
+        font-weight: bold;
+    }
+    
+    .competencia-nivel {
+        font-size: 0.8rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 15px;
+    }
+    
+    .competencia-progreso {
+        height: 6px;
+        border-radius: 3px;
+        margin-top: 0.3rem;
+    }
+    
+    .nivel-excelente { 
+        background-color: #198754; 
+        color: white; 
+    }
+    
+    .nivel-muy-bueno { 
+        background-color: #20c997; 
+        color: white; 
+    }
+    
+    .nivel-bueno { 
+        background-color: #0dcaf0; 
+        color: white; 
+    }
+    
+    .nivel-regular { 
+        background-color: #ffc107; 
+        color: #000; 
+    }
+    
+    .nivel-deficiente { 
+        background-color: #dc3545; 
+        color: white; 
+    }
+    
+    .bg-light {
+        background-color: #f8f9fa !important;
+        border: 1px solid #e9ecef;
+    }
+    
+    .card-header {
+        font-weight: 600;
+    }
+    
+    #competenciasChart {
+        max-height: 300px;
+    }
+</style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container-fluid">
+        <span class="navbar-brand">
+            <i class="fas fa-chart-line me-2"></i>
+            SABER PRO - Dashboard Coordinador
+        </span>
+        <div class="d-flex align-items-center">
+            <span class="text-white me-3">
+                <i class="fas fa-user-tie me-1"></i>
+                Coordinador Académico
+            </span>
+            <button id="logoutBtn" class="btn btn-outline-light">
+                <i class="fas fa-sign-out-alt me-1"></i>Cerrar Sesión
+            </button>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid" style="margin-top: 76px;">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar p-3">
+            <nav class="nav flex-column">
+                <a class="nav-link active" href="#" data-section="dashboard">
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                </a>
+                <a class="nav-link" href="#" data-section="estudiantes">
+                    <i class="fas fa-users me-2"></i>Gestión Estudiantes
+                </a>
+                <a class="nav-link" href="#" data-section="reportes">
+                    <i class="fas fa-file-alt me-2"></i>Reportes
+                </a>
+                <a class="nav-link" href="#" data-section="incentivos">
+                    <i class="fas fa-trophy me-2"></i>Incentivos
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 p-4">
+            <!-- Dashboard Section -->
+            <div id="dashboard-section" class="content-section active">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h2><i class="fas fa-tachometer-alt me-2"></i>Dashboard General</h2>
+                        <p class="text-muted">Resumen estadístico de resultados Saber Pro</p>
+                    </div>
+                </div>
+
+                <!-- Estadísticas Cards -->
+                <div class="row mb-4">
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <i class="fas fa-users fa-2x mb-3"></i>
+                                <div class="stat-number" id="totalEstudiantes">0</div>
+                                <div>Total Estudiantes</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card stat-card" style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);">
+                            <div class="card-body">
+                                <i class="fas fa-graduation-cap fa-2x mb-3"></i>
+                                <div class="stat-number" id="puedenGraduar">0</div>
+                                <div>Pueden Graduarse</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card stat-card" style="background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);">
+                            <div class="card-body">
+                                <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                                <div class="stat-number" id="noPuedenGraduar">0</div>
+                                <div>No Pueden Graduarse</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card stat-card" style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);">
+                            <div class="card-body">
+                                <i class="fas fa-trophy fa-2x mb-3"></i>
+                                <div class="stat-number" id="conIncentivos">0</div>
+                                <div>Con Incentivos</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="row">
+                    <div class="col-lg-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-chart-pie me-2"></i>
+                                    Distribución de Puntajes
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="puntajesChart" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-chart-bar me-2"></i>
+                                    Promedio por Competencia
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="competenciasChart" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gestión Estudiantes Section -->
+            <div id="estudiantes-section" class="content-section">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h2><i class="fas fa-users me-2"></i>Gestión de Estudiantes</h2>
+                        <p class="text-muted">Administrar información y resultados de estudiantes</p>
+                    </div>
+                </div>
+
+                <!-- Search and Actions Bar -->
+                <div class="row mb-4">
+                    <div class="col-lg-8">
+                        <div class="search-container d-flex">
+                            <input type="text" id="searchInput" class="form-control border-0" 
+                                   placeholder="Buscar por nombre, documento o programa...">
+                            <button class="btn btn-link" onclick="buscarEstudiante()" title="Buscar">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            <button class="btn btn-link text-secondary" onclick="limpiarBusqueda()" title="Limpiar búsqueda">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 text-end">
+                        <button class="btn btn-success btn-modern me-2" onclick="nuevoEstudiante()">
+                            <i class="fas fa-plus me-1"></i>Nuevo Estudiante
+                        </button>
+                        <button class="btn btn-info btn-modern" onclick="importarDatos()">
+                            <i class="fas fa-file-import me-1"></i>Importar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Students Table -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-table me-2"></i>
+                            Lista de Estudiantes
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="estudiantesTable">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Documento</th>
+                                        <th>Nombre</th>
+                                        <th>Programa</th>
+                                        <th>Puntaje Global</th>
+                                        <th>Estado</th>
+                                        <th>Incentivos</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted">
+                                            <i class="fas fa-spinner fa-spin me-2"></i>
+                                            Cargando estudiantes...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Other sections -->
+            <div id="reportes-section" class="content-section">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h2><i class="fas fa-file-alt me-2"></i>Reportes</h2>
+                        <p class="text-muted">Generación de reportes personalizados en PDF y Excel</p>
+                    </div>
+                </div>
+
+                <!-- Reportes Individuales -->
+                <div class="row mb-4">
+                    <div class="col-lg-4 col-md-6 mb-3">
+                        <div class="card h-100 border-primary">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-user-graduate me-2"></i>
+                                    Reporte Individual
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">Generar reporte PDF detallado de un estudiante específico con todas sus competencias y resultados.</p>
+                                <div class="mb-3">
+                                    <label for="estudianteSelect" class="form-label">Seleccionar Estudiante:</label>
+                                    <select class="form-select" id="estudianteSelect">
+                                        <option value="">Cargando estudiantes...</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-primary w-100" onclick="generarReporteIndividual()">
+                                    <i class="fas fa-file-pdf me-2"></i>
+                                    Generar PDF Individual
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reporte Consolidado -->
+                    <div class="col-lg-4 col-md-6 mb-3">
+                        <div class="card h-100 border-success">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-users me-2"></i>
+                                    Reporte Consolidado
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">Generar reporte completo de todos los estudiantes con estadísticas generales y listado detallado.</p>
+                                <div class="mb-3">
+                                    <label class="form-label">Formato de exportación:</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="formatoConsolidado" id="pdfConsolidado" value="pdf" checked>
+                                        <label class="form-check-label" for="pdfConsolidado">PDF</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="formatoConsolidado" id="excelConsolidado" value="excel">
+                                        <label class="form-check-label" for="excelConsolidado">Excel</label>
+                                    </div>
+                                </div>
+                                <button class="btn btn-success w-100" onclick="generarReporteConsolidado()">
+                                    <i class="fas fa-file-export me-2"></i>
+                                    Generar Reporte Completo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reportes por Criterios -->
+                    <div class="col-lg-4 col-md-6 mb-3">
+                        <div class="card h-100 border-warning">
+                            <div class="card-header bg-warning text-dark">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-filter me-2"></i>
+                                    Reporte por Criterios
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">Generar reportes filtrados según criterios específicos de rendimiento académico.</p>
+                                <div class="mb-3">
+                                    <label for="criterioSelect" class="form-label">Seleccionar Criterio:</label>
+                                    <select class="form-select" id="criterioSelect">
+                                        <option value="pueden-graduar">Pueden Graduarse (≥80 puntos)</option>
+                                        <option value="no-pueden-graduar">No Pueden Graduarse (<80 puntos)</option>
+                                        <option value="con-incentivos">Con Incentivos (≥180 puntos)</option>
+                                        <option value="excelente">Rendimiento Excelente (≥200 puntos)</option>
+                                        <option value="deficiente">Rendimiento Deficiente (<50 puntos)</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Formato:</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="formatoCriterio" id="pdfCriterio" value="pdf" checked>
+                                        <label class="form-check-label" for="pdfCriterio">PDF</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="formatoCriterio" id="excelCriterio" value="excel">
+                                        <label class="form-check-label" for="excelCriterio">Excel</label>
+                                    </div>
+                                </div>
+                                <button class="btn btn-warning w-100" onclick="generarReportePorCriterio()">
+                                    <i class="fas fa-file-contract me-2"></i>
+                                    Generar Reporte Filtrado
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estadísticas de Reportes -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-chart-line me-2"></i>
+                                    Resumen de Datos para Reportes
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-md-3 mb-3">
+                                        <div class="bg-light p-3 rounded">
+                                            <h4 class="text-primary mb-1" id="reporteTotalEstudiantes">0</h4>
+                                            <small class="text-muted">Total Estudiantes</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <div class="bg-light p-3 rounded">
+                                            <h4 class="text-success mb-1" id="reportePuedenGraduar">0</h4>
+                                            <small class="text-muted">Pueden Graduarse</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <div class="bg-light p-3 rounded">
+                                            <h4 class="text-warning mb-1" id="reporteConIncentivos">0</h4>
+                                            <small class="text-muted">Con Incentivos</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <div class="bg-light p-3 rounded">
+                                            <h4 class="text-info mb-1" id="reportePromedioGeneral">0</h4>
+                                            <small class="text-muted">Promedio General</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        <strong>Último reporte generado:</strong> <span id="ultimoReporte">Ninguno</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="incentivos-section" class="content-section">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h2><i class="fas fa-trophy me-2"></i>Gestión de Incentivos</h2>
+                        <p class="text-muted">Administración de incentivos y beneficios académicos</p>
+                    </div>
+                </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Sección en desarrollo - Próximamente disponible
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Ver Detalles del Estudiante -->
+<div class="modal fade" id="estudianteDetalleModal" tabindex="-1" aria-labelledby="estudianteDetalleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="estudianteDetalleModalLabel">
+                    <i class="fas fa-user me-2"></i>
+                    Detalles Completos del Estudiante
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-4">
+                    <!-- Información Personal -->
+                    <div class="col-12">
+                        <div class="card border-primary">
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0"><i class="fas fa-id-card me-2"></i>Información Personal</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold text-primary">Documento:</label>
+                                        <p id="detalleDocumento" class="form-control-plaintext bg-light p-2 rounded">-</p>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold text-primary">Tipo Documento:</label>
+                                        <p id="detalleTipoDocumento" class="form-control-plaintext bg-light p-2 rounded">-</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold text-primary">Nombre Completo:</label>
+                                        <p id="detalleNombre" class="form-control-plaintext bg-light p-2 rounded">-</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold text-primary">Correo Electrónico:</label>
+                                        <p id="detalleCorreo" class="form-control-plaintext bg-light p-2 rounded">-</p>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold text-primary">Teléfono:</label>
+                                        <p id="detalleTelefono" class="form-control-plaintext bg-light p-2 rounded">-</p>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold text-primary">Programa Académico:</label>
+                                        <p id="detallePrograma" class="form-control-plaintext bg-light p-2 rounded">-</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resultados Globales -->
+                    <div class="col-12">
+                        <div class="card border-success">
+                            <div class="card-header bg-success text-white">
+                                <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>Resultados Globales</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold text-success">Puntaje Global:</label>
+                                        <div class="d-flex align-items-center">
+                                            <span id="detallePuntaje" class="h4 text-success mb-0">-</span>
+                                            <span class="text-muted ms-2">/ 300</span>
+                                        </div>
+                                        <div id="detallePuntajeBarra" class="progress mt-2" style="height: 8px;">
+                                            <div class="progress-bar bg-success" role="progressbar"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold text-success">Estado Graduación:</label>
+                                        <p id="detalleEstado" class="form-control-plaintext">
+                                            <span class="badge bg-secondary">-</span>
+                                        </p>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold text-success">Nivel Global:</label>
+                                        <p id="detalleNivel" class="form-control-plaintext">
+                                            <span class="badge bg-info">-</span>
+                                        </p>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold text-success">Estado Incentivos:</label>
+                                        <p id="detalleIncentivos" class="form-control-plaintext">
+                                            <span class="badge bg-warning">-</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Competencias Genéricas -->
+                    <div class="col-md-6">
+                        <div class="card border-info">
+                            <div class="card-header bg-info text-white">
+                                <h6 class="mb-0"><i class="fas fa-brain me-2"></i>Competencias Genéricas</h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="detalleCompetenciasGenericas" class="competencias-container">
+                                    <!-- Se llenará dinámicamente -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Competencias Específicas -->
+                    <div class="col-md-6">
+                        <div class="card border-warning">
+                            <div class="card-header bg-warning text-white">
+                                <h6 class="mb-0"><i class="fas fa-cogs me-2"></i>Competencias Específicas</h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="detalleCompetenciasEspecificas" class="competencias-container">
+                                    <!-- Se llenará dinámicamente -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico de Competencias -->
+                    <div class="col-12">
+                        <div class="card border-secondary">
+                            <div class="card-header bg-secondary text-white">
+                                <h6 class="mb-0"><i class="fas fa-chart-radar me-2"></i>Gráfico de Competencias</h6>
+                            </div>
+                            <div class="card-body" style="min-height: 450px;">
+                                <div class="chart-container" style="position: relative; height: 400px; width: 100%; min-height: 400px; display: block;">
+                                    <canvas id="estudianteCompetenciasChart" style="width: 100%; height: 100%; min-height: 400px;"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-info" onclick="imprimirDetalles()">
+                    <i class="fas fa-print me-1"></i>Imprimir
+                </button>
+                <button type="button" class="btn btn-success" onclick="exportarPDF()">
+                    <i class="fas fa-file-pdf me-1"></i>Exportar PDF
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Importar Datos -->
+<div class="modal fade" id="importarModal" tabindex="-1" aria-labelledby="importarModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="importarModalLabel">
+                    <i class="fas fa-file-import me-2"></i>
+                    Importar Datos
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="archivoImportar" class="form-label">Seleccionar archivo Excel:</label>
+                    <input type="file" class="form-control" id="archivoImportar" accept=".xlsx,.xls">
+                    <div class="form-text">Formatos soportados: .xlsx, .xls</div>
+                </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Formato esperado:</strong> El archivo debe contener las columnas: documento, tipoDocumento, primerApellido, segundoApellido, primerNombre, segundoNombre, correoElectronico, numeroTelefono, programaAcademico, puntajeGlobal, comunicacionEscrita, razonamientoCuantitativo, lecturaCritica, competenciasCiudadanas, ingles, formulacionProyectosIngenieria, disenoSoftware.
+                </div>
+                <div id="importProgress" class="d-none">
+                    <div class="progress mb-3">
+                        <div id="progressBar" class="progress-bar bg-info" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <div id="importStatus" class="text-center"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-info" id="btnImportar" onclick="procesarImportacion()">
+                    <i class="fas fa-upload me-1"></i>Importar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Nuevo/Editar Estudiante -->
+<div class="modal fade" id="estudianteModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">
+                    <i class="fas fa-user-plus me-2"></i>
+                    <span>Nuevo Estudiante</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formEstudiante" class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" id="documento" class="form-control" placeholder="Documento" required>
+                            <label for="documento">Número de Documento</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <select id="tipoDocumento" class="form-select" required>
+                                <option value="">Seleccione...</option>
+                                <option value="CC">Cédula de Ciudadanía</option>
+                                <option value="TI">Tarjeta de Identidad</option>
+                                <option value="CE">Cédula de Extranjería</option>
+                                <option value="PA">Pasaporte</option>
+                            </select>
+                            <label for="tipoDocumento">Tipo de Documento</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" id="primerApellido" class="form-control" placeholder="Primer Apellido" required>
+                            <label for="primerApellido">Primer Apellido</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" id="segundoApellido" class="form-control" placeholder="Segundo Apellido">
+                            <label for="segundoApellido">Segundo Apellido</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" id="primerNombre" class="form-control" placeholder="Primer Nombre" required>
+                            <label for="primerNombre">Primer Nombre</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" id="segundoNombre" class="form-control" placeholder="Segundo Nombre">
+                            <label for="segundoNombre">Segundo Nombre</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="email" id="correoElectronico" class="form-control" placeholder="Correo">
+                            <label for="correoElectronico">Correo Electrónico</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="tel" id="numeroTelefono" class="form-control" placeholder="Teléfono">
+                            <label for="numeroTelefono">Número de Teléfono</label>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-floating">
+                            <input type="text" id="programaAcademico" class="form-control" placeholder="Programa" required>
+                            <label for="programaAcademico">Programa Académico</label>
+                        </div>
+                    </div>
+
+                    <!-- Puntajes Saber Pro -->
+                    <div class="col-12 mt-4">
+                        <h6><i class="fas fa-chart-bar me-2"></i>Puntajes Saber Pro</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="form-floating">
+                                    <input type="number" id="puntajeGlobal" class="form-control" min="0" max="300" placeholder="Puntaje">
+                                    <label for="puntajeGlobal">Puntaje Global</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-floating">
+                                    <input type="number" id="comunicacionEscrita" class="form-control" min="0" max="300" placeholder="Puntaje">
+                                    <label for="comunicacionEscrita">Comunicación Escrita</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-floating">
+                                    <input type="number" id="razonamientoCuantitativo" class="form-control" min="0" max="300" placeholder="Puntaje">
+                                    <label for="razonamientoCuantitativo">Razonamiento Cuantitativo</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-floating">
+                                    <input type="number" id="lecturaCritica" class="form-control" min="0" max="300" placeholder="Puntaje">
+                                    <label for="lecturaCritica">Lectura Crítica</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-floating">
+                                    <input type="number" id="competenciasCiudadanas" class="form-control" min="0" max="300" placeholder="Puntaje">
+                                    <label for="competenciasCiudadanas">Competencias Ciudadanas</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-floating">
+                                    <input type="number" id="ingles" class="form-control" min="0" max="300" placeholder="Puntaje">
+                                    <label for="ingles">Inglés</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="number" id="formulacionProyectos" class="form-control" min="0" max="300" placeholder="Puntaje">
+                                    <label for="formulacionProyectos">Formulación de Proyectos</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="number" id="disenoSoftware" class="form-control" min="0" max="300" placeholder="Puntaje">
+                                    <label for="disenoSoftware">Diseño de Software</label>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-floating">
+                                    <input type="number" id="pensamientoCientifico" class="form-control" min="0" max="300" placeholder="Puntaje">
+                                    <label for="pensamientoCientifico">Pensamiento Científico Matemáticas y Estadística</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" onclick="guardarEstudiante()">
+                    <i class="fas fa-save me-1"></i>Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sección de Incentivos -->
+<div id="incentivos-section" class="content-section">
+    <div class="alert alert-info">
+        <i class="fas fa-trophy me-2"></i>
+        Sección en desarrollo - Próximamente disponible
+    </div>
+</div>
+
+<!-- Scripts necesarios -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+<!-- SheetJS para generar archivos Excel reales con codificación UTF-8 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- SweetAlert2 para modales de confirmación -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Script principal de la aplicación -->
+<script src="app-simple.js"></script>
+
+</body>
+</html>
