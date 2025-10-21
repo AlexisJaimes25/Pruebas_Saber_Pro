@@ -52,6 +52,9 @@ public interface AsignacionIncentivoRepository extends MongoRepository<Asignacio
     // Estadísticas por tipo de incentivo
     @Query(value = "{'tipoIncentivo': ?0}", count = true)
     long countByTipoIncentivo(String tipoIncentivo);
+
+    // Verificar si existen asignaciones vinculadas a un tipo específico
+    boolean existsByTipoIncentivo_Id(String tipoIncentivoId);
     
     // Suma total de montos por estado
     @Query("{'estado': ?0}")

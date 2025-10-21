@@ -1,6 +1,7 @@
 package com.saberpro.controller;
 
 import com.saberpro.model.TipoIncentivo;
+import com.saberpro.repository.AsignacionIncentivoRepository;
 import com.saberpro.repository.TipoIncentivoRepository;
 import com.saberpro.service.IncentivoEvaluacionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,21 +22,17 @@ public class TipoIncentivoController {
     
     @Autowired
     private IncentivoEvaluacionService evaluacionService;
+
+    @Autowired
+    private AsignacionIncentivoRepository asignacionIncentivoRepository;
     
     // Obtener todos los tipos de incentivos
     @GetMapping
     public ResponseEntity<List<TipoIncentivo>> obtenerTodos() {
-        System.out.println("🎯 [INCENTIVOS] GET /api/tipos-incentivos - Obteniendo todos los tipos");
         try {
             List<TipoIncentivo> tipos = tipoIncentivoRepository.findAll();
-            System.out.println("🎯 [INCENTIVOS] ✅ Encontrados " + tipos.size() + " tipos de incentivos");
-            for (TipoIncentivo tipo : tipos) {
-                System.out.println("🎯 [INCENTIVOS]   - " + tipo.getNombre() + " (ID: " + tipo.getId() + ", Activo: " + tipo.isActivo() + ", Puntaje min: " + tipo.getPuntajeMinimo() + ")");
-            }
             return ResponseEntity.ok(tipos);
         } catch (Exception e) {
-            System.err.println("🎯 [INCENTIVOS] ❌ Error obteniendo tipos: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -43,14 +40,10 @@ public class TipoIncentivoController {
     // Obtener solo tipos activos
     @GetMapping("/activos")
     public ResponseEntity<List<TipoIncentivo>> obtenerActivos() {
-        System.out.println("🎯 [INCENTIVOS] GET /api/tipos-incentivos/activos - Obteniendo tipos activos");
         try {
             List<TipoIncentivo> tipos = tipoIncentivoRepository.findByActivoTrue();
-            System.out.println("🎯 [INCENTIVOS] ✅ Encontrados " + tipos.size() + " tipos activos");
             return ResponseEntity.ok(tipos);
         } catch (Exception e) {
-            System.err.println("🎯 [INCENTIVOS] ❌ Error obteniendo tipos activos: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -58,19 +51,14 @@ public class TipoIncentivoController {
     // Obtener tipo por ID
     @GetMapping("/{id}")
     public ResponseEntity<TipoIncentivo> obtenerPorId(@PathVariable String id) {
-        System.out.println("🎯 [INCENTIVOS] GET /api/tipos-incentivos/" + id + " - Obteniendo tipo por ID");
         try {
             Optional<TipoIncentivo> tipo = tipoIncentivoRepository.findById(id);
             if (tipo.isPresent()) {
-                System.out.println("🎯 [INCENTIVOS] ✅ Tipo encontrado: " + tipo.get().getNombre());
                 return ResponseEntity.ok(tipo.get());
             } else {
-                System.out.println("🎯 [INCENTIVOS] ⚠️ Tipo no encontrado con ID: " + id);
                 return ResponseEntity.notFound().build();
             }
         } catch (Exception e) {
-            System.err.println("🎯 [INCENTIVOS] ❌ Error obteniendo tipo por ID: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -78,33 +66,23 @@ public class TipoIncentivoController {
     // Crear nuevo tipo de incentivo
     @PostMapping
     public ResponseEntity<?> crear(@RequestBody TipoIncentivo nuevoTipo) {
-        System.out.println("🎯 [INCENTIVOS] POST /api/tipos-incentivos - Creando nuevo tipo");
-        System.out.println("🎯 [INCENTIVOS] Datos recibidos: " + 
-            "Nombre: '" + nuevoTipo.getNombre() + "', " +
-            "Puntaje mín: " + nuevoTipo.getPuntajeMinimo() + ", " +
-            "Monto: " + nuevoTipo.getMonto());
         try {
             // Validaciones básicas
             if (nuevoTipo.getNombre() == null || nuevoTipo.getNombre().trim().isEmpty()) {
-                System.out.println("🎯 [INCENTIVOS] ❌ Validación falló: Nombre requerido");
                 return ResponseEntity.badRequest().body("El nombre es requerido");
             }
             
             if (nuevoTipo.getPuntajeMinimo() < 0 || nuevoTipo.getPuntajeMinimo() > 300) {
-                System.out.println("🎯 [INCENTIVOS] ❌ Validación falló: Puntaje inválido (" + nuevoTipo.getPuntajeMinimo() + ")");
                 return ResponseEntity.badRequest().body("El puntaje mínimo debe estar entre 0 y 300");
             }
             
             if (nuevoTipo.getMonto() < 0) {
-                System.out.println("🎯 [INCENTIVOS] ❌ Validación falló: Monto negativo (" + nuevoTipo.getMonto() + ")");
                 return ResponseEntity.badRequest().body("El monto no puede ser negativo");
             }
             
             // Verificar si ya existe un incentivo con el mismo nombre
             boolean existe = tipoIncentivoRepository.existsByNombreAndActivoTrue(nuevoTipo.getNombre());
-            System.out.println("🎯 [INCENTIVOS] Verificando duplicado: " + existe);
             if (existe) {
-                System.out.println("🎯 [INCENTIVOS] ❌ Duplicado encontrado: " + nuevoTipo.getNombre());
                 return ResponseEntity.badRequest().body("Ya existe un incentivo activo con ese nombre");
             }
             
@@ -114,12 +92,9 @@ public class TipoIncentivoController {
             }
             
             TipoIncentivo guardado = tipoIncentivoRepository.save(nuevoTipo);
-            System.out.println("🎯 [INCENTIVOS] ✅ Tipo creado exitosamente - ID: " + guardado.getId());
             return ResponseEntity.status(HttpStatus.CREATED).body(guardado);
             
         } catch (Exception e) {
-            System.err.println("🎯 [INCENTIVOS] ❌ Error creando tipo: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                .body("Error al crear tipo de incentivo: " + e.getMessage());
         }
@@ -128,51 +103,36 @@ public class TipoIncentivoController {
     // Actualizar tipo de incentivo
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizar(@PathVariable String id, @RequestBody TipoIncentivo tipoActualizado) {
-        System.out.println("🎯 [INCENTIVOS] PUT /api/tipos-incentivos/" + id + " - Actualizando tipo");
-        System.out.println("🎯 [INCENTIVOS] Nuevos datos: " + 
-            "Nombre: '" + tipoActualizado.getNombre() + "', " +
-            "Puntaje mín: " + tipoActualizado.getPuntajeMinimo() + ", " +
-            "Monto: " + tipoActualizado.getMonto());
         try {
             Optional<TipoIncentivo> tipoExistente = tipoIncentivoRepository.findById(id);
             
             if (tipoExistente.isEmpty()) {
-                System.out.println("🎯 [INCENTIVOS] ❌ Tipo no encontrado para actualizar: " + id);
                 return ResponseEntity.notFound().build();
             }
             
             TipoIncentivo tipo = tipoExistente.get();
-            System.out.println("🎯 [INCENTIVOS] ✅ Tipo encontrado: " + tipo.getNombre());
             
             // Actualizar campos
             if (tipoActualizado.getNombre() != null) {
-                System.out.println("🎯 [INCENTIVOS] Actualizando nombre: '" + tipo.getNombre() + "' → '" + tipoActualizado.getNombre() + "'");
                 tipo.setNombre(tipoActualizado.getNombre());
             }
             if (tipoActualizado.getDescripcion() != null) {
-                System.out.println("🎯 [INCENTIVOS] Actualizando descripción");
                 tipo.setDescripcion(tipoActualizado.getDescripcion());
             }
             if (tipoActualizado.getPuntajeMinimo() > 0) {
-                System.out.println("🎯 [INCENTIVOS] Actualizando puntaje: " + tipo.getPuntajeMinimo() + " → " + tipoActualizado.getPuntajeMinimo());
                 tipo.setPuntajeMinimo(tipoActualizado.getPuntajeMinimo());
             }
             if (tipoActualizado.getMonto() >= 0) {
-                System.out.println("🎯 [INCENTIVOS] Actualizando monto: " + tipo.getMonto() + " → " + tipoActualizado.getMonto());
                 tipo.setMonto(tipoActualizado.getMonto());
             }
             if (tipoActualizado.getBeneficios() != null) {
-                System.out.println("🎯 [INCENTIVOS] Actualizando beneficios");
                 tipo.setBeneficios(tipoActualizado.getBeneficios());
             }
             
             TipoIncentivo guardado = tipoIncentivoRepository.save(tipo);
-            System.out.println("🎯 [INCENTIVOS] ✅ Tipo actualizado exitosamente");
             return ResponseEntity.ok(guardado);
             
         } catch (Exception e) {
-            System.err.println("🎯 [INCENTIVOS] ❌ Error actualizando tipo: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                .body("Error al actualizar tipo de incentivo: " + e.getMessage());
         }
@@ -181,26 +141,20 @@ public class TipoIncentivoController {
     // Activar/Desactivar tipo de incentivo
     @PutMapping("/{id}/toggle-activo")
     public ResponseEntity<?> toggleActivo(@PathVariable String id) {
-        System.out.println("🎯 [INCENTIVOS] PUT /api/tipos-incentivos/" + id + "/toggle-activo - Cambiando estado");
         try {
             Optional<TipoIncentivo> tipoOpt = tipoIncentivoRepository.findById(id);
             
             if (tipoOpt.isEmpty()) {
-                System.out.println("🎯 [INCENTIVOS] ❌ Tipo no encontrado para toggle: " + id);
                 return ResponseEntity.notFound().build();
             }
             
             TipoIncentivo tipo = tipoOpt.get();
-            boolean estadoAnterior = tipo.isActivo();
             tipo.setActivo(!tipo.isActivo());
             
             TipoIncentivo guardado = tipoIncentivoRepository.save(tipo);
-            System.out.println("🎯 [INCENTIVOS] ✅ Estado cambiado: " + estadoAnterior + " → " + guardado.isActivo());
             return ResponseEntity.ok(guardado);
             
         } catch (Exception e) {
-            System.err.println("🎯 [INCENTIVOS] ❌ Error cambiando estado: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                .body("Error al cambiar estado: " + e.getMessage());
         }
@@ -216,12 +170,14 @@ public class TipoIncentivoController {
                 return ResponseEntity.notFound().build();
             }
             
-            // En lugar de eliminar físicamente, desactivar
-            TipoIncentivo tipoObj = tipo.get();
-            tipoObj.setActivo(false);
-            tipoIncentivoRepository.save(tipoObj);
-            
-            return ResponseEntity.ok().body("Tipo de incentivo desactivado");
+            // Evitar eliminar tipos con asignaciones activas para no dejar referencias rotas
+            if (asignacionIncentivoRepository.existsByTipoIncentivo_Id(id)) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("No se puede eliminar el tipo porque existen asignaciones asociadas.\n\nSigue estos pasos antes de eliminarlo:\n1. Desactiva el incentivo.\n2. Reevaluar estudiantes.\n3. Elimina el incentivo nuevamente.");
+            }
+
+            tipoIncentivoRepository.deleteById(id);
+            return ResponseEntity.ok().body("Tipo de incentivo eliminado");
             
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

@@ -37,62 +37,10 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        System.out.println("🚀 ==========================================");
-        System.out.println("🚀 === INICIALIZANDO APLICACIÓN ===");
-        System.out.println("🚀 ==========================================");
-        System.out.println("🚀 Timestamp: " + java.time.LocalDateTime.now());
-        System.out.println("🚀 DataInitializer ejecutándose...");
-        
-        try {
-            // Test de conexión a MongoDB
-            System.out.println("🔗 === VERIFICANDO CONEXIÓN A MONGODB ===");
-            long totalUsuarios = usuarioRepository.count();
-            long totalResultados = resultadoRepository.count();
-            System.out.println("🔗 Conexión exitosa a MongoDB");
-            System.out.println("🔗 Total usuarios en BD: " + totalUsuarios);
-            System.out.println("🔗 Total resultados en BD: " + totalResultados);
-            
-            // Limpiar datos existentes (solo en desarrollo)
-            // usuarioRepository.deleteAll();
-            // resultadoRepository.deleteAll();
-
-            // 🔄 CAMBIO DE ORDEN: Crear resultados PRIMERO, luego usuarios
-            // Crear resultados de ejemplo basados en los datos del Excel
-            System.out.println("� === INICIALIZANDO RESULTADOS ===");
-            initializeResultadosEjemplo();
-            
-            // Crear usuarios de ejemplo si no existen (DESPUÉS de los estudiantes)
-            System.out.println("� === INICIALIZANDO USUARIOS ===");
-            initializeUsuarios();
-            
-            // Crear tipos de incentivos configurables
-            System.out.println("� === INICIALIZANDO TIPOS DE INCENTIVOS ===");
-            initializeTiposIncentivos();
-            
-            // Evaluar automáticamente incentivos para estudiantes existentes
-            System.out.println("🤖 === EVALUACIÓN AUTOMÁTICA DE INCENTIVOS ===");
-            evaluarIncentivoAutomatico();
-            
-            // Verificación final
-            System.out.println("✅ === VERIFICACIÓN FINAL ===");
-            totalUsuarios = usuarioRepository.count();
-            totalResultados = resultadoRepository.count();
-            long totalTiposIncentivos = tipoIncentivoRepository.count();
-            System.out.println("✅ Total usuarios después de inicialización: " + totalUsuarios);
-            System.out.println("✅ Total resultados después de inicialización: " + totalResultados);
-            System.out.println("✅ Total tipos de incentivos después de inicialización: " + totalTiposIncentivos);
-            
-            System.out.println("🚀 ==========================================");
-            System.out.println("🚀 === INICIALIZACIÓN COMPLETADA ===");
-            System.out.println("🚀 ==========================================");
-            
-        } catch (Exception e) {
-            System.err.println("💥 ERROR CRÍTICO en DataInitializer:");
-            System.err.println("💥 Excepción: " + e.getClass().getSimpleName());
-            System.err.println("💥 Mensaje: " + e.getMessage());
-            e.printStackTrace();
-            throw e;
-        }
+        initializeResultadosEjemplo();
+        initializeUsuarios();
+        initializeTiposIncentivos();
+        evaluarIncentivoAutomatico();
     }
 
     private void initializeUsuarios() {
@@ -100,28 +48,17 @@ public class DataInitializer implements CommandLineRunner {
         if (usuarioRepository.findByDocumento("admin").isEmpty()) {
             Usuario coordinador = new Usuario("admin", "COORDINADOR", "admin");
             usuarioRepository.save(coordinador);
-            System.out.println("👤 Usuario coordinador creado: admin/admin");
         }
 
         // 🆕 Generar usuarios automáticamente para todos los estudiantes en estudiantes_resultados
         List<EstudianteResultado> estudiantes = estudianteResultadoRepository.findAll();
-        System.out.println("🎓 Generando usuarios para " + estudiantes.size() + " estudiantes encontrados...");
-        
-        int usuariosCreados = 0;
         for (EstudianteResultado estudiante : estudiantes) {
             if (usuarioRepository.findByDocumento(estudiante.getDocumento()).isEmpty()) {
                 // Usar documento como correo y contraseña
                 Usuario usuarioEstudiante = new Usuario(estudiante.getDocumento(), "ESTUDIANTE", estudiante.getDocumento());
                 usuarioRepository.save(usuarioEstudiante);
-                usuariosCreados++;
-                System.out.println("🎓 Usuario estudiante creado: " + estudiante.getDocumento() + " (" + 
-                                 estudiante.getPrimerNombre() + " " + estudiante.getPrimerApellido() + 
-                                 ") - Usuario: " + estudiante.getDocumento() + "/" + estudiante.getDocumento());
             }
         }
-        
-        System.out.println("✅ Usuarios estudiantes creados: " + usuariosCreados);
-        System.out.println("👥 === FIN INICIALIZACIÓN USUARIOS ===");
     }
 
     private void initializeResultadosEjemplo() {
@@ -186,7 +123,9 @@ public class DataInitializer implements CommandLineRunner {
             resultado.setRazonamientoCuantitativoNivel(calcularNivelCompetencia(resultado.getRazonamientoCuantitativo()));
             resultado.setLecturaCriticaNivel(calcularNivelCompetencia(resultado.getLecturaCritica()));
             resultado.setCompetenciasCiudadanasNivel(calcularNivelCompetencia(resultado.getCompetenciasCiudadanas()));
-            resultado.setInglesNivel(calcularNivelCompetencia(resultado.getIngles()));
+            resultado.setInglesNivel(calcularNivelIngles(resultado.getIngles()));
+            resultado.setFormulacionProyectosIngenieriaNivel(calcularNivelCompetencia(resultado.getFormulacionProyectosIngenieria()));
+            resultado.setPensamientoCientificoMatematicasNivel(calcularNivelCompetencia(resultado.getPensamientoCientificoMatematicas()));
             resultado.setDisenoSoftwareNivel(calcularNivelCompetencia(resultado.getDisenoSoftware()));
             
             // Guardar el resultado
@@ -223,6 +162,23 @@ public class DataInitializer implements CommandLineRunner {
         resultado.setCompetenciasCiudadanas(compCiudadanas);
         resultado.setIngles(ingles);
         resultado.setFormulacionProyectosIngenieria(formProyectos);
+
+        Integer pensamiento = null;
+        if (formProyectos != null || disenoSoft != null) {
+            int suma = 0;
+            int contador = 0;
+            if (formProyectos != null) {
+                suma += formProyectos;
+                contador++;
+            }
+            if (disenoSoft != null) {
+                suma += disenoSoft;
+                contador++;
+            }
+            pensamiento = contador > 0 ? Math.round((float) suma / contador) : null;
+        }
+        resultado.setPensamientoCientificoMatematicas(pensamiento);
+
         resultado.setDisenoSoftware(disenoSoft);
 
         // Información académica
@@ -235,8 +191,6 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void initializeTiposIncentivos() {
-        System.out.println("� Creando tipos de incentivos configurables...");
-        
         if (tipoIncentivoRepository.count() == 0) {
             // Tipo 1: Beca 100% para puntajes excelentes (241+)
             TipoIncentivo tipo1 = new TipoIncentivo(
@@ -248,7 +202,6 @@ public class DataInitializer implements CommandLineRunner {
                 "Coordinador"
             );
             tipoIncentivoRepository.save(tipo1);
-            System.out.println("✅ Tipo creado: Beca 100% (≥241 puntos)");
 
             // Tipo 2: Beca 50% para puntajes muy buenos (211-240)
             TipoIncentivo tipo2 = new TipoIncentivo(
@@ -291,8 +244,8 @@ public class DataInitializer implements CommandLineRunner {
             if (!estudiantes.isEmpty()) {
                 evaluacionService.reevaluarTodosLosEstudiantes(estudiantes);
             }
-        } catch (Exception e) {
-            System.err.println("❌ Error en evaluación automática: " + e.getMessage());
+        } catch (Exception ignored) {
+            // La reevaluación automática no debe interrumpir el inicio de la aplicación
         }
     }
 
@@ -303,13 +256,25 @@ public class DataInitializer implements CommandLineRunner {
         if (puntaje == null) {
             return "Sin información";
         }
-        
-        if (puntaje >= 200) {
-            return "Satisfactorio";
-        } else if (puntaje >= 150) {
-            return "Mínimo";
-        } else {
-            return "Insuficiente";
+        return calcularNivelGeneral(puntaje);
+    }
+
+    private String calcularNivelGeneral(int puntaje) {
+        if (puntaje >= 180) return "Nivel 4";
+        if (puntaje >= 150) return "Nivel 3";
+        if (puntaje >= 120) return "Nivel 2";
+        return "Nivel 1";
+    }
+
+    private String calcularNivelIngles(Integer puntaje) {
+        if (puntaje == null) {
+            return "Sin información";
         }
+        int valor = puntaje;
+        if (valor >= 190) return "B2";
+        if (valor >= 160) return "B1";
+        if (valor >= 135) return "A2";
+        if (valor >= 110) return "A1";
+        return "A0";
     }
 }

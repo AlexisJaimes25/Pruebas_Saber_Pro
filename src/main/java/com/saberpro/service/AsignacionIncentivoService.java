@@ -26,6 +26,10 @@ public class AsignacionIncentivoService {
         return asignacionIncentivoRepository.findAll();
     }
 
+    public long contarTodos() {
+        return asignacionIncentivoRepository.count();
+    }
+
     public Optional<AsignacionIncentivo> obtenerPorId(String id) {
         return asignacionIncentivoRepository.findById(id);
     }
@@ -35,12 +39,9 @@ public class AsignacionIncentivoService {
     }
 
     public void eliminar(String id) {
-        System.out.println("🗑️ [SERVICE] Eliminando incentivo con id: " + id);
         try {
-            asignacionIncentivoRepository.deleteById(id);
-            System.out.println("🗑️ [SERVICE] ✅ Incentivo eliminado del repositorio exitosamente");
+                asignacionIncentivoRepository.deleteById(id);
         } catch (Exception e) {
-            System.err.println("🗑️ [SERVICE] ❌ Error en repositorio al eliminar: " + e.getMessage());
             throw e;
         }
     }
@@ -150,12 +151,35 @@ public class AsignacionIncentivoService {
         return asignacionIncentivoRepository.findByEstadoOrderByFechaAsignacionDesc(estado);
     }
 
+    public long contarPorEstado(String estado) {
+        return asignacionIncentivoRepository.countByEstado(estado);
+    }
+
     public List<AsignacionIncentivo> obtenerPorPrograma(String programa) {
         return asignacionIncentivoRepository.findByProgramaAcademico(programa);
     }
 
     public List<AsignacionIncentivo> obtenerRecientes() {
         return asignacionIncentivoRepository.findTop10ByOrderByFechaCreacionDesc();
+    }
+
+    public long contarAutomaticos() {
+        return asignacionIncentivoRepository.countByEvaluacionAutomaticaTrue();
+    }
+
+    public double sumatoriaMontos(String estado) {
+        List<AsignacionIncentivo> incentivos;
+
+        if (estado == null) {
+            incentivos = asignacionIncentivoRepository.findAll();
+        } else {
+            incentivos = asignacionIncentivoRepository.findByEstadoForSum(estado);
+        }
+
+        return incentivos.stream()
+            .filter(i -> i.getTipoIncentivo() != null)
+            .mapToDouble(i -> i.getTipoIncentivo().getMonto())
+            .sum();
     }
 
     // Estadísticas

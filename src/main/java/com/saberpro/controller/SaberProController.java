@@ -223,7 +223,6 @@ public class SaberProController {
                     procesados++;
                 } catch (Exception e) {
                     errores++;
-                    System.err.println("Error procesando resultado " + resultado.getDocumento() + ": " + e.getMessage());
                 }
             }
 

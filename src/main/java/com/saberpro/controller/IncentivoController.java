@@ -37,21 +37,10 @@ public class IncentivoController {
     // Obtener todos los incentivos
     @GetMapping
     public ResponseEntity<List<AsignacionIncentivo>> obtenerTodos() {
-        System.out.println("🎁 [ASIGNACIONES] GET /api/incentivos - Obteniendo todas las asignaciones");
         try {
             List<AsignacionIncentivo> incentivos = asignacionIncentivoService.obtenerTodos();
-            System.out.println("🎁 [ASIGNACIONES] ✅ Encontradas " + incentivos.size() + " asignaciones");
-            for (AsignacionIncentivo incentivo : incentivos) {
-                String tipoNombre = incentivo.getTipoIncentivo() != null ? 
-                    incentivo.getTipoIncentivo().getNombre() : "Sin tipo";
-                System.out.println("🎁 [ASIGNACIONES]   - " + incentivo.getNombreCompleto() + 
-                    " (" + incentivo.getDocumentoEstudiante() + ") → " + tipoNombre + 
-                    " [" + incentivo.getEstado() + "]");
-            }
             return ResponseEntity.ok(incentivos);
         } catch (Exception e) {
-            System.err.println("🎁 [ASIGNACIONES] ❌ Error obteniendo asignaciones: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -59,62 +48,17 @@ public class IncentivoController {
     // Obtener todas las asignaciones automáticas (endpoint específico)
     @GetMapping("/asignaciones")
     public ResponseEntity<List<AsignacionIncentivo>> obtenerAsignacionesAutomaticas() {
-        System.out.println("=== [BACKEND] INICIO GET /api/incentivos/asignaciones ===");
-        System.out.println("🎁 [ASIGNACIONES] Timestamp: " + java.time.LocalDateTime.now());
-        System.out.println("🎁 [ASIGNACIONES] Thread: " + Thread.currentThread().getName());
-        
         try {
-            System.out.println("🎁 [ASIGNACIONES] Llamando a asignacionIncentivoService.obtenerTodos()...");
             List<AsignacionIncentivo> incentivos = asignacionIncentivoService.obtenerTodos();
-            System.out.println("🎁 [ASIGNACIONES] ✅ Servicio respondió con " + incentivos.size() + " asignaciones totales");
-            
             if (incentivos.isEmpty()) {
-                System.out.println("⚠️ [ASIGNACIONES] WARNING: No se encontraron asignaciones en la base de datos");
                 return ResponseEntity.ok(new ArrayList<>());
             }
-            
-            // Mostrar información detallada de todas las asignaciones
-            System.out.println("🎁 [ASIGNACIONES] Detalle de todas las asignaciones:");
-            for (int i = 0; i < incentivos.size(); i++) {
-                AsignacionIncentivo incentivo = incentivos.get(i);
-                System.out.println("🎁 [ASIGNACIONES]   [" + (i+1) + "] ID: " + incentivo.getId() + 
-                    ", Estudiante: " + incentivo.getNombreCompleto() + 
-                    ", Documento: " + incentivo.getDocumentoEstudiante() + 
-                    ", Automático: " + incentivo.isEvaluacionAutomatica() +
-                    ", Estado: " + incentivo.getEstado());
-            }
-            
-            // Filtrar solo las automáticas
-            System.out.println("🎁 [ASIGNACIONES] Filtrando asignaciones automáticas...");
             List<AsignacionIncentivo> automaticas = incentivos.stream()
                 .filter(AsignacionIncentivo::isEvaluacionAutomatica)
                 .toList();
-                
-            System.out.println("🎁 [ASIGNACIONES] ✅ Asignaciones automáticas filtradas: " + automaticas.size());
-            
-            if (automaticas.isEmpty()) {
-                System.out.println("⚠️ [ASIGNACIONES] WARNING: No hay asignaciones marcadas como automáticas");
-            } else {
-                System.out.println("🎁 [ASIGNACIONES] Detalle de asignaciones automáticas:");
-                for (AsignacionIncentivo incentivo : automaticas) {
-                    String tipoNombre = incentivo.getTipoIncentivo() != null ? 
-                        incentivo.getTipoIncentivo().getNombre() : "Sin tipo";
-                    System.out.println("🎁 [ASIGNACIONES]   - " + incentivo.getNombreCompleto() + 
-                        " (" + incentivo.getDocumentoEstudiante() + ") → " + tipoNombre + 
-                        " [" + incentivo.getEstado() + "] AUTOMÁTICO");
-                }
-            }
-            
-            System.out.println("🎁 [ASIGNACIONES] Retornando ResponseEntity.ok() con " + automaticas.size() + " elementos");
-            System.out.println("=== [BACKEND] FIN GET /api/incentivos/asignaciones ===");
             return ResponseEntity.ok(automaticas);
             
         } catch (Exception e) {
-            System.err.println("🎁 [ASIGNACIONES] ❌ ERROR CRÍTICO en endpoint /asignaciones:");
-            System.err.println("🎁 [ASIGNACIONES] ❌ Mensaje: " + e.getMessage());
-            System.err.println("🎁 [ASIGNACIONES] ❌ Clase: " + e.getClass().getSimpleName());
-            e.printStackTrace();
-            System.out.println("=== [BACKEND] FIN CON ERROR GET /api/incentivos/asignaciones ===");
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -122,19 +66,14 @@ public class IncentivoController {
     // Obtener incentivo por ID
     @GetMapping("/{id}")
     public ResponseEntity<AsignacionIncentivo> obtenerPorId(@PathVariable String id) {
-        System.out.println("🎁 [ASIGNACIONES] GET /api/incentivos/" + id + " - Obteniendo asignación por ID");
         try {
             Optional<AsignacionIncentivo> incentivo = asignacionIncentivoService.obtenerPorId(id);
             if (incentivo.isPresent()) {
-                System.out.println("🎁 [ASIGNACIONES] ✅ Asignación encontrada: " + incentivo.get().getNombreCompleto());
                 return ResponseEntity.ok(incentivo.get());
             } else {
-                System.out.println("🎁 [ASIGNACIONES] ⚠️ Asignación no encontrada: " + id);
                 return ResponseEntity.notFound().build();
             }
         } catch (Exception e) {
-            System.err.println("🎁 [ASIGNACIONES] ❌ Error obteniendo asignación por ID: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -181,20 +120,14 @@ public class IncentivoController {
     // Eliminar incentivo
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable String id) {
-        System.out.println("🗑️ [DELETE] DELETE /api/incentivos/" + id + " - Iniciando eliminación de incentivo");
         try {
             if (!asignacionIncentivoService.obtenerPorId(id).isPresent()) {
-                System.out.println("🗑️ [DELETE] ❌ Incentivo no encontrado con id: " + id);
                 return ResponseEntity.notFound().build();
             }
             
-            System.out.println("🗑️ [DELETE] ✅ Incentivo encontrado, procediendo a eliminar...");
             asignacionIncentivoService.eliminar(id);
-            System.out.println("🗑️ [DELETE] ✅ Incentivo eliminado exitosamente con id: " + id);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
-            System.err.println("🗑️ [DELETE] ❌ Error eliminando incentivo: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -376,33 +309,21 @@ public class IncentivoController {
     // Obtener estadísticas generales de incentivos
     @GetMapping("/estadisticas")
     public ResponseEntity<Map<String, Object>> obtenerEstadisticasGenerales() {
-        System.out.println("📊 [ESTADISTICAS] GET /api/incentivos/estadisticas - Obteniendo estadísticas generales");
         try {
-            List<AsignacionIncentivo> todasAsignaciones = asignacionIncentivoService.obtenerTodos();
-            
-            // Contar por estados
-            long pendientes = todasAsignaciones.stream().filter(a -> "PENDIENTE".equals(a.getEstado())).count();
-            long aprobados = todasAsignaciones.stream().filter(a -> "APROBADO".equals(a.getEstado())).count();
-            long entregados = todasAsignaciones.stream().filter(a -> "ENTREGADO".equals(a.getEstado())).count();
-            long rechazados = todasAsignaciones.stream().filter(a -> "RECHAZADO".equals(a.getEstado())).count();
-            
-            // Contar por tipo de evaluación
-            long automaticos = todasAsignaciones.stream().filter(AsignacionIncentivo::isEvaluacionAutomatica).count();
-            long manuales = todasAsignaciones.size() - automaticos;
-            
-            // Calcular montos
-            double montoTotal = todasAsignaciones.stream()
-                .filter(a -> a.getTipoIncentivo() != null)
-                .mapToDouble(a -> a.getTipoIncentivo().getMonto())
-                .sum();
-                
-            double montoEntregado = todasAsignaciones.stream()
-                .filter(a -> "ENTREGADO".equals(a.getEstado()) && a.getTipoIncentivo() != null)
-                .mapToDouble(a -> a.getTipoIncentivo().getMonto())
-                .sum();
+            long total = asignacionIncentivoService.contarTodos();
+            long pendientes = asignacionIncentivoService.contarPorEstado("PENDIENTE");
+            long aprobados = asignacionIncentivoService.contarPorEstado("APROBADO");
+            long entregados = asignacionIncentivoService.contarPorEstado("ENTREGADO");
+            long rechazados = asignacionIncentivoService.contarPorEstado("RECHAZADO");
+
+            long automaticos = asignacionIncentivoService.contarAutomaticos();
+            long manuales = total - automaticos;
+
+            double montoTotal = asignacionIncentivoService.sumatoriaMontos(null);
+            double montoEntregado = asignacionIncentivoService.sumatoriaMontos("ENTREGADO");
 
             Map<String, Object> estadisticas = Map.of(
-                "total", todasAsignaciones.size(),
+                "total", total,
                 "porEstado", Map.of(
                     "pendientes", pendientes,
                     "aprobados", aprobados,
@@ -419,17 +340,8 @@ public class IncentivoController {
                     "pendiente", montoTotal - montoEntregado
                 )
             );
-            
-            System.out.println("📊 [ESTADISTICAS] ✅ Estadísticas calculadas: " +
-                "Total=" + todasAsignaciones.size() + 
-                ", Pendientes=" + pendientes + 
-                ", Aprobados=" + aprobados + 
-                ", Entregados=" + entregados);
-            
             return ResponseEntity.ok(estadisticas);
         } catch (Exception e) {
-            System.err.println("📊 [ESTADISTICAS] ❌ Error calculando estadísticas: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -437,7 +349,6 @@ public class IncentivoController {
     // Obtener distribución por tipo de incentivo
     @GetMapping("/distribucion-tipos")
     public ResponseEntity<Map<String, Object>> obtenerDistribucionTipos() {
-        System.out.println("📊 [ESTADISTICAS] GET /api/incentivos/distribucion-tipos - Obteniendo distribución por tipos");
         try {
             List<AsignacionIncentivo> asignaciones = asignacionIncentivoService.obtenerTodos();
             List<TipoIncentivo> tipos = tipoIncentivoRepository.findAll();
@@ -454,13 +365,8 @@ public class IncentivoController {
                 "totalTipos", tipos.size(),
                 "totalAsignaciones", asignaciones.size()
             );
-            
-            System.out.println("📊 [ESTADISTICAS] ✅ Distribución calculada: " + distribucion);
-            
             return ResponseEntity.ok(resultado);
         } catch (Exception e) {
-            System.err.println("📊 [ESTADISTICAS] ❌ Error calculando distribución: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -468,17 +374,10 @@ public class IncentivoController {
     // Obtener estadísticas de evaluación automática
     @GetMapping("/estadisticas-evaluacion")
     public ResponseEntity<IncentivoEvaluacionService.EstatisticasIncentivos> obtenerEstadisticasEvaluacion() {
-        System.out.println("📊 [ESTADISTICAS] GET /api/incentivos/estadisticas-evaluacion - Obteniendo estadísticas de evaluación");
         try {
             IncentivoEvaluacionService.EstatisticasIncentivos stats = evaluacionService.obtenerEstadisticasEvaluacion();
-            System.out.println("📊 [ESTADISTICAS] ✅ Estadísticas de evaluación: " +
-                "Total=" + stats.getTotal() + 
-                ", Automáticos=" + stats.getAutomaticos() + 
-                ", Manuales=" + stats.getManuales());
             return ResponseEntity.ok(stats);
         } catch (Exception e) {
-            System.err.println("📊 [ESTADISTICAS] ❌ Error obteniendo estadísticas de evaluación: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -486,18 +385,11 @@ public class IncentivoController {
     // Reevaluar todos los estudiantes con incentivos automáticos
     @PostMapping("/reevaluar-todos")
     public ResponseEntity<?> reevaluarTodosLosEstudiantes() {
-        System.out.println("🔄 [REEVALUACION] POST /api/incentivos/reevaluar-todos - Iniciando reevaluación de todos los estudiantes");
         try {
             // Obtener todos los resultados de estudiantes para reevaluación
             List<EstudianteResultado> todosLosEstudiantes = estudianteResultadoRepository.findAll();
-            
-            System.out.println("🔄 [REEVALUACION] Encontrados " + todosLosEstudiantes.size() + " estudiantes para reevaluar");
-            
             // Ejecutar reevaluación y obtener número de nuevas asignaciones
             int nuevasAsignaciones = evaluacionService.reevaluarTodosLosEstudiantes(todosLosEstudiantes);
-            
-            System.out.println("🔄 [REEVALUACION] ✅ Reevaluación completada exitosamente - " + nuevasAsignaciones + " nuevas asignaciones");
-            
             return ResponseEntity.ok(Map.of(
                 "mensaje", "Reevaluación completada exitosamente",
                 "estudiantesReevaluados", todosLosEstudiantes.size(),
@@ -505,8 +397,6 @@ public class IncentivoController {
                 "timestamp", System.currentTimeMillis()
             ));
         } catch (Exception e) {
-            System.err.println("🔄 [REEVALUACION] ❌ Error durante la reevaluación: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.internalServerError().body(Map.of(
                 "error", "Error durante la reevaluación: " + e.getMessage(),
                 "timestamp", System.currentTimeMillis()
@@ -516,23 +406,15 @@ public class IncentivoController {
 
     @PostMapping("/reevaluar-estudiante/{documento}")
     public ResponseEntity<?> reevaluarEstudianteEspecifico(@PathVariable String documento) {
-        System.out.println("🔄 [REEVALUACION-INDIVIDUAL] POST /api/incentivos/reevaluar-estudiante/" + documento + " - Iniciando reevaluación de estudiante específico");
         try {
             // Buscar el estudiante específico
             EstudianteResultado estudiante = estudianteResultadoRepository.findByDocumento(documento);
             
             if (estudiante == null) {
-                System.out.println("🔄 [REEVALUACION-INDIVIDUAL] ❌ Estudiante no encontrado: " + documento);
                 return ResponseEntity.notFound().build();
             }
-            
-            System.out.println("🔄 [REEVALUACION-INDIVIDUAL] ✅ Estudiante encontrado: " + estudiante.getPrimerNombre() + " " + estudiante.getPrimerApellido() + " (Puntaje: " + estudiante.getPuntajeGlobal() + ")");
-            
             // Ejecutar reevaluación para este estudiante específico
             int nuevasAsignaciones = evaluacionService.reevaluarEstudianteIndividual(estudiante);
-            
-            System.out.println("🔄 [REEVALUACION-INDIVIDUAL] ✅ Reevaluación completada para estudiante " + documento + " - " + nuevasAsignaciones + " nuevas asignaciones");
-            
             return ResponseEntity.ok(Map.of(
                 "mensaje", "Reevaluación completada exitosamente para estudiante " + documento,
                 "documento", documento,
@@ -542,8 +424,6 @@ public class IncentivoController {
                 "timestamp", System.currentTimeMillis()
             ));
         } catch (Exception e) {
-            System.err.println("🔄 [REEVALUACION-INDIVIDUAL] ❌ Error durante la reevaluación del estudiante " + documento + ": " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.internalServerError().body(Map.of(
                 "error", "Error durante la reevaluación del estudiante: " + e.getMessage(),
                 "documento", documento,
@@ -554,20 +434,9 @@ public class IncentivoController {
 
     @PostMapping("/limpiar-y-regenerar")
     public ResponseEntity<?> limpiarYRegenerarAsignaciones() {
-        System.out.println("🧹 [LIMPIAR-REGENERAR] 🚀 Iniciando limpieza y regeneración de asignaciones automáticas");
-        
         try {
-            // 1. Eliminar todas las asignaciones automáticas existentes
-            System.out.println("🧹 [LIMPIAR-REGENERAR] 🗑️ Eliminando asignaciones automáticas existentes...");
             int eliminadas = evaluacionService.eliminarAsignacionesAutomaticas();
-            System.out.println("🧹 [LIMPIAR-REGENERAR] ✅ Eliminadas " + eliminadas + " asignaciones automáticas");
-            
-            // 2. Regenerar asignaciones basadas en estudiantes_resultados actuales
-            System.out.println("🧹 [LIMPIAR-REGENERAR] 🔄 Regenerando asignaciones desde estudiantes_resultados...");
             int regeneradas = evaluacionService.regenerarAsignacionesAutomaticas();
-            System.out.println("🧹 [LIMPIAR-REGENERAR] ✅ Regeneradas " + regeneradas + " asignaciones automáticas");
-            
-            // 3. Obtener estadísticas actualizadas
             var stats = evaluacionService.obtenerEstadisticasEvaluacion();
             
             return ResponseEntity.ok(Map.of(
@@ -584,8 +453,6 @@ public class IncentivoController {
             ));
             
         } catch (Exception e) {
-            System.err.println("🧹 [LIMPIAR-REGENERAR] ❌ Error durante limpieza y regeneración: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.internalServerError().body(Map.of(
                 "error", "Error durante la limpieza y regeneración: " + e.getMessage(),
                 "timestamp", System.currentTimeMillis()
@@ -596,8 +463,6 @@ public class IncentivoController {
     @PostMapping("/test/actualizar-puntaje/{documento}/{nuevoPuntaje}")
     public ResponseEntity<?> actualizarPuntajePrueba(@PathVariable String documento, @PathVariable Integer nuevoPuntaje) {
         try {
-            System.out.println("🔧 [TEST] Actualizando puntaje para documento: " + documento + " → " + nuevoPuntaje);
-            
             // Buscar en estudiantes_resultados usando el repository inyectado
             var estudiantes = estudianteResultadoRepository.findAll();
             var estudianteOpt = estudiantes.stream()
@@ -609,9 +474,6 @@ public class IncentivoController {
                 Integer puntajeAnterior = estudiante.getPuntajeGlobal();
                 estudiante.setPuntajeGlobal(nuevoPuntaje);
                 estudianteResultadoRepository.save(estudiante);
-                
-                System.out.println("🔧 [TEST] Puntaje actualizado: " + puntajeAnterior + " → " + nuevoPuntaje);
-                
                 return ResponseEntity.ok(Map.of(
                     "success", true,
                     "mensaje", "Puntaje actualizado exitosamente",
@@ -624,7 +486,6 @@ public class IncentivoController {
             }
             
         } catch (Exception e) {
-            System.err.println("🔧 [TEST] Error actualizando puntaje: " + e.getMessage());
             return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
         }
     }

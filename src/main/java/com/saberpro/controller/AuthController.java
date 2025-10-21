@@ -22,7 +22,12 @@ public class AuthController {
         String password = request.get("password");
         Map<String, Object> res = new HashMap<>();
         
-        Optional<Usuario> userOpt = usuarioRepo.findByDocumento(documento);
+        Optional<Usuario> userOpt = Optional.empty();
+        if (documento != null) {
+            String trimmedDocumento = documento.trim();
+            userOpt = usuarioRepo.findByDocumentoIgnoreCase(trimmedDocumento);
+        }
+
         if (userOpt.isPresent()) {
             Usuario user = userOpt.get();
             if (user.getPassword().equals(password)) {

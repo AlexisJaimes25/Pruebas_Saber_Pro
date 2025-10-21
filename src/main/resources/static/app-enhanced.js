@@ -2,6 +2,13 @@
 // SABER PRO - SISTEMA DE GESTIÓN MEJORADO
 // ============================================================
 
+(() => {
+const console = {
+    log: () => {},
+    warn: () => {},
+    error: () => {}
+};
+
 // Función de prueba para verificar que el JS se carga
 console.log('🚀 app-enhanced.js cargado correctamente - INICIO');
 
@@ -231,7 +238,9 @@ class LoginController {
     async handleLogin(event) {
         event.preventDefault();
         
-        const documento = document.getElementById('documento').value.trim();
+    const rawDocumento = document.getElementById('documento').value.trim();
+    const documento = rawDocumento.toUpperCase();
+    document.getElementById('documento').value = documento;
         const password = document.getElementById('password').value;
         const submitBtn = event.target.querySelector('button[type="submit"]');
         const btnText = submitBtn.querySelector('.btn-text');
@@ -252,7 +261,8 @@ class LoginController {
             const response = await ApiService.login(documento, password);
             
             if (response.success) {
-                SessionManager.setSession(documento, response.rol);
+                const documentoSesion = response.documento || documento;
+                SessionManager.setSession(documentoSesion, response.rol);
                 Utils.showAlert('¡Ingreso exitoso!', 'success');
                 
                 setTimeout(() => {
@@ -1655,3 +1665,5 @@ window.SaberProSystem = {
 };
 
 console.log('🎉 app-enhanced.js cargado COMPLETAMENTE - FINAL');
+
+})();

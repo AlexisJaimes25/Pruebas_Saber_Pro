@@ -1,3 +1,10 @@
+(() => {
+const console = {
+    log: () => {},
+    warn: () => {},
+    error: () => {}
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     // ...existing code...
 
@@ -11,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const documento = document.getElementById('documento').value;
             const password = document.getElementById('password').value;
 
-            const res = await fetch('/auth/login', {
+            const res = await fetch('http://localhost:8081/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ documento, password })
@@ -47,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (sessionStorage.getItem('rol') !== 'ESTUDIANTE') window.location = 'index.html';
         const doc = sessionStorage.getItem('documento');
 
-        fetch(`/api/estudiantes/resultado/${doc}`)
+        fetch(`http://localhost:8081/api/estudiantes/resultado/${doc}`)
             .then(res => res.json())
             .then(data => {
                 const incentivosEl = document.getElementById('estadoIncentivos');
@@ -103,20 +110,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('infoNumeroTelefono').innerText = data.numeroTelefono || '';
                 document.getElementById('infoProgramaAcademico').innerText = data.programaAcademico || '';
                 document.getElementById('infoPuntajeGlobal').innerText = data.puntajeGlobal || '';
-                // Calcular nivel de efectividad según puntaje
-                function calcularNivel(puntaje) {
-                    if (puntaje === null || puntaje === undefined || isNaN(puntaje)) return '';
-                    if (puntaje >= 350) return 'Alto';
-                    if (puntaje >= 250) return 'Medio';
-                    if (puntaje >= 150) return 'Bajo';
-                    return 'Muy Bajo';
-                }
+                const calcularNivelGeneral = (puntaje) => {
+                    if (!Number.isFinite(puntaje)) return '';
+                    if (puntaje >= 180) return 'Nivel 4';
+                    if (puntaje >= 150) return 'Nivel 3';
+                    if (puntaje >= 120) return 'Nivel 2';
+                    return 'Nivel 1';
+                };
+
+                const calcularNivelIngles = (puntaje) => {
+                    if (!Number.isFinite(puntaje)) return '';
+                    if (puntaje >= 190) return 'B2';
+                    if (puntaje >= 160) return 'B1';
+                    if (puntaje >= 135) return 'A2';
+                    if (puntaje >= 110) return 'A1';
+                    return 'A0';
+                };
+
+                const calcularNivelMateria = (materia, puntaje) => {
+                    if (!materia) return calcularNivelGeneral(puntaje);
+                    const nombreNormalizado = materia.toLowerCase();
+                    if (nombreNormalizado.includes('ingl')) {
+                        return calcularNivelIngles(puntaje);
+                    }
+                    return calcularNivelGeneral(puntaje);
+                };
                 const tbody = document.querySelector('#notasTable tbody');
                 tbody.innerHTML = '';
-                data.notas.forEach(n => {
-                    const nivel = calcularNivel(n.puntaje);
+                (data.notas || []).forEach(n => {
+                    const puntaje = Number(n?.puntaje ?? NaN);
+                    const nivel = n?.nivel && n.nivel.trim()
+                        ? n.nivel
+                        : calcularNivelMateria(n?.materia ?? '', puntaje);
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `<td>${n.materia}</td><td>${n.puntaje}</td><td>${nivel}</td>`;
+                    tr.innerHTML = `<td>${n?.materia ?? ''}</td><td>${Number.isFinite(puntaje) ? puntaje : ''}</td><td>${nivel}</td>`;
                     tbody.appendChild(tr);
                 });
             })
@@ -300,3 +327,5 @@ document.addEventListener('DOMContentLoaded', () => {
         cargarEstudiantes();
     }
 });
+
+})();

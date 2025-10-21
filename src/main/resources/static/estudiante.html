@@ -8,13 +8,19 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js">
 <style>
+    :root {
+        --verde-oscuro: #1b5e20;
+        --verde-primario: #2e7d32;
+        --verde-resalte: #43a047;
+        --verde-claro: #f0f7f2;
+    }
     body {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        background: linear-gradient(135deg, var(--verde-claro) 0%, #d5f0dc 100%);
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     .navbar {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        background: linear-gradient(135deg, var(--verde-primario) 0%, var(--verde-oscuro) 100%) !important;
+        box-shadow: 0 2px 12px rgba(27,94,32,0.22);
     }
     .navbar-brand {
         color: white !important;
@@ -24,14 +30,14 @@
     .card {
         border: none;
         border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        box-shadow: 0 10px 30px rgba(27,94,32,0.12);
         backdrop-filter: blur(10px);
-        background: rgba(255,255,255,0.9);
+        background: rgba(255,255,255,0.94);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
     .card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        box-shadow: 0 18px 44px rgba(27,94,32,0.18);
     }
     .card-header {
         background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
@@ -61,8 +67,8 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        opacity: 0.9;
+        background: linear-gradient(135deg, var(--verde-primario) 0%, var(--verde-oscuro) 100%);
+        opacity: 0.92;
     }
     
     .profile-header-bg::before {
@@ -104,14 +110,14 @@
     }
     
     .student-name-section {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
-        border-bottom: 1px solid rgba(0,0,0,0.05);
+        background: linear-gradient(135deg, rgba(255,255,255,0.96) 0%, rgba(240,247,242,0.92) 100%) !important;
+        border-bottom: 1px solid rgba(46,125,50,0.12);
     }
     
     .student-initials {
         width: 80px;
         height: 80px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--verde-resalte) 0%, var(--verde-oscuro) 100%);
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -120,7 +126,7 @@
         color: white;
         font-size: 1.8rem;
         font-weight: bold;
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        box-shadow: 0 8px 25px rgba(67,160,71,0.35);
         animation: pulse-glow 3s ease-in-out infinite;
     }
     
@@ -138,14 +144,14 @@
     .info-card:hover {
         background: rgba(255,255,255,0.95);
         transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        border-color: rgba(102, 126, 234, 0.2);
+        box-shadow: 0 8px 25px rgba(27,94,32,0.12);
+        border-color: rgba(67,160,71,0.22);
     }
     
     .info-icon {
         width: 40px;
         height: 40px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--verde-resalte) 0%, var(--verde-primario) 100%);
         border-radius: 10px;
         display: flex;
         align-items: center;
@@ -154,7 +160,7 @@
         margin-right: 15px;
         flex-shrink: 0;
         font-size: 1.1rem;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        box-shadow: 0 4px 15px rgba(67,160,71,0.3);
     }
     
     .info-content {
@@ -176,12 +182,12 @@
     }
     
     @keyframes pulse-glow {
-        0%, 100% { 
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        0%, 100% {
+            box-shadow: 0 8px 25px rgba(67,160,71,0.32);
             transform: scale(1);
         }
-        50% { 
-            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5);
+        50% {
+            box-shadow: 0 12px 35px rgba(67,160,71,0.48);
             transform: scale(1.05);
         }
     }
@@ -200,7 +206,7 @@
     
     .analysis-card:hover {
         transform: translateY(-3px);
-        box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+        box-shadow: 0 14px 38px rgba(27,94,32,0.16);
     }
     
     .analysis-header {
@@ -208,7 +214,7 @@
         align-items: center;
         margin-bottom: 15px;
         padding-bottom: 10px;
-        border-bottom: 2px solid rgba(0,0,0,0.05);
+    border-bottom: 2px solid rgba(46,125,50,0.14);
     }
     
     .analysis-header i {
@@ -227,7 +233,7 @@
     }
     
     .estadisticas-card .analysis-header i {
-        color: #007bff;
+        color: var(--verde-primario);
     }
     
     .recomendaciones-card .analysis-header i {
@@ -242,7 +248,7 @@
         margin-bottom: 8px;
         background: rgba(255,255,255,0.7);
         border-radius: 10px;
-        border-left: 4px solid #007bff;
+        border-left: 4px solid var(--verde-primario);
         transition: all 0.2s ease;
     }
     
@@ -268,8 +274,8 @@
     .puntaje {
         font-weight: bold;
         font-size: 1rem;
-        color: #007bff;
-        background: rgba(0,123,255,0.1);
+    color: var(--verde-primario);
+    background: rgba(46,125,50,0.12);
         padding: 4px 8px;
         border-radius: 8px;
         min-width: 40px;
@@ -328,9 +334,9 @@
     }
     
     .recommendation.info {
-        background: rgba(0, 123, 255, 0.1);
-        border-left: 4px solid #007bff;
-        color: #004085;
+        background: rgba(46, 125, 50, 0.12);
+        border-left: 4px solid var(--verde-primario);
+        color: var(--verde-oscuro);
     }
     
     .alert-status {
@@ -338,7 +344,7 @@
         border-radius: 15px;
         border: none;
         font-weight: 600;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        box-shadow: 0 5px 15px rgba(27,94,32,0.14);
     }
     .competencia-card {
         transition: all 0.3s ease;
@@ -363,18 +369,18 @@
     .incentivo-card {
         border: none;
         border-radius: 15px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 18px rgba(27,94,32,0.12);
         transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-        background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+        background: linear-gradient(135deg, #ffffff 0%, #eef7ef 100%);
     }
     
     .incentivo-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+        box-shadow: 0 10px 30px rgba(27,94,32,0.18);
     }
     
     .incentivo-card .card-title {
-        color: #2c5aa0;
+        color: var(--verde-primario);
         font-size: 1.1rem;
     }
     

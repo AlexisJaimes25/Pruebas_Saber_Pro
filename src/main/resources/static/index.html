@@ -87,12 +87,12 @@
                 
                 <form id="loginForm" novalidate>
                     <div class="form-floating mb-4">
-                        <input type="text" id="documento" class="form-control" 
-                               placeholder="Número de documento" required 
-                               pattern="[0-9]{8,12}" maxlength="12">
+                        <input type="text" id="documento" class="form-control"
+                               placeholder="Número de documento" required
+                               pattern="[A-Za-z0-9]{4,20}" maxlength="20" autocomplete="username">
                         <label for="documento"><i class="fas fa-id-card me-2"></i>Número de Documento</label>
                         <div class="invalid-feedback">
-                            Ingrese un documento válido (8-12 dígitos)
+                            Ingrese un documento válido (4-20 caracteres alfanuméricos)
                         </div>
                     </div>
                     

@@ -1,8 +1,9 @@
 package com.saberpro.model;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 
 @Document(collection = "asignaciones_incentivos")
@@ -10,19 +11,24 @@ public class AsignacionIncentivo {
     @Id
     private String id;
     
+    @Indexed
     private String documentoEstudiante; // Documento del estudiante
     private String nombreCompleto;
     
     // CAMBIO: Ahora referencia al TipoIncentivo configurado
     @DBRef
+    @Indexed
     private TipoIncentivo tipoIncentivo; // Referencia al tipo de incentivo configurado
     
+    @Indexed
     private String estado; // PENDIENTE, APROBADO, ENTREGADO, RECHAZADO
     private boolean evaluacionAutomatica; // true si fue asignado automáticamente
+    @Indexed
     private LocalDateTime fechaAsignacion;
     private LocalDateTime fechaAprobacion;
     private LocalDateTime fechaEntrega;
     private String observaciones;
+    @Indexed
     private String programaAcademico;
     private Integer puntajeObtenido;
     private String semestreAcademico;

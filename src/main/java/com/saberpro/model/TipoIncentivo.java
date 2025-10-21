@@ -1,6 +1,7 @@
 package com.saberpro.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 
@@ -10,11 +11,14 @@ public class TipoIncentivo {
     @Id
     private String id;
     
+    @Indexed
     private String nombre;                // "Beca 100% Derechos de Grado"
     private String descripcion;          // "Exoneración completa + Seminario nota 5.0"
+    @Indexed
     private int puntajeMinimo;          // 241
     private double monto;               // 500000.0
     private String beneficios;          // Lista detallada de beneficios
+    @Indexed
     private boolean activo;             // true/false
     private LocalDateTime fechaCreacion;
     private LocalDateTime fechaModificacion;

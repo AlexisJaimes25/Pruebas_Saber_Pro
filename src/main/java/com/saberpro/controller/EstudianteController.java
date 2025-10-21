@@ -2,8 +2,6 @@ package com.saberpro.controller;
 
 import com.saberpro.model.Usuario;
 import com.saberpro.repository.UsuarioRepository;
-import com.saberpro.model.Usuario;
-import com.saberpro.repository.UsuarioRepository;
 import com.saberpro.model.EstudianteResultado;
 import com.saberpro.repository.EstudianteResultadoRepository;
 import com.saberpro.service.EstudianteService;
@@ -40,6 +38,7 @@ public class EstudianteController {
         if (estudiante != null) {
             estudianteRepo.delete(estudiante);
         }
+        eliminarUsuarioAsociado(documento);
     }
     // Eliminar materia de un estudiante
     @DeleteMapping("/resultados/{documento}/notas/{materia}")
@@ -76,9 +75,8 @@ public class EstudianteController {
                 String materia = map.get("materia") != null ? map.get("materia").toString() : null;
                 Integer puntaje = null;
                 try { puntaje = Integer.parseInt(map.get("puntaje").toString()); } catch (Exception ignored) {}
-                String nivel = map.get("nivel") != null ? map.get("nivel").toString() : "";
                 if (materia != null && puntaje != null) {
-                    nuevasNotas.add(new com.saberpro.model.Nota(materia, puntaje, nivel));
+                    nuevasNotas.add(new com.saberpro.model.Nota(materia, puntaje, calcularNivelMateria(materia, puntaje)));
                 }
             }
         }
@@ -99,83 +97,15 @@ public class EstudianteController {
     // Endpoint específico para reporte individual - coincide con la ruta del frontend
     @GetMapping("/estudiantes/resultado/{documento}")
     public ResponseEntity<EstudianteResultado> getEstudianteParaReporte(@PathVariable String documento) {
-        System.out.println("🚨 ==========================================");
-        System.out.println("🚨 === ENDPOINT REPORTE INDIVIDUAL LLAMADO ===");
-        System.out.println("🚨 ==========================================");
-        System.out.println("📋 URL completa: /api/estudiantes/resultado/" + documento);
-        System.out.println("📋 Documento solicitado: '" + documento + "'");
-        System.out.println("📋 Tipo de documento: " + documento.getClass().getSimpleName());
-        System.out.println("📋 Longitud del documento: " + documento.length());
-        System.out.println("📋 Timestamp: " + java.time.LocalDateTime.now());
-        
         try {
-            System.out.println("🔍 === INICIANDO BÚSQUEDA EN BASE DE DATOS ===");
-            System.out.println("🔍 Usando servicio con logs detallados...");
-            
-            // Usar el servicio con logs detallados
             EstudianteResultado estudiante = estudianteService.findByDocumentoConLogs(documento);
             
             if (estudiante == null) {
-                System.out.println("❌ === ESTUDIANTE DEFINITIVAMENTE NO ENCONTRADO ===");
-                System.out.println("❌ El documento '" + documento + "' no existe en la base de datos");
-                System.out.println("❌ Enviando respuesta 404...");
                 return ResponseEntity.notFound().build();
             }
-            
-            // Si llegamos aquí, el estudiante fue encontrado
-            System.out.println("✅ === ESTUDIANTE ENCONTRADO - PROCESANDO DATOS ===");
-            System.out.println("✅ Documento: " + estudiante.getDocumento());
-            System.out.println("✅ Nombre completo: " + estudiante.getNombreCompleto());
-            System.out.println("✅ Correo: " + estudiante.getCorreoElectronico());
-            System.out.println("✅ Teléfono: " + estudiante.getNumeroTelefono());
-            System.out.println("✅ Programa: " + estudiante.getProgramaAcademico());
-            System.out.println("✅ Tipo documento: " + estudiante.getTipoDocumento());
-            System.out.println("✅ Puntaje Global: " + estudiante.getPuntajeGlobal());
-            System.out.println("✅ Nivel ICFES: " + estudiante.getNivelIcfes());
-            System.out.println("✅ Percentil: " + estudiante.getPercentil());
-            
-            // Análisis detallado de notas
-            if (estudiante.getNotas() != null && !estudiante.getNotas().isEmpty()) {
-                System.out.println("📊 === ANÁLISIS DE NOTAS PARA REPORTE ===");
-                System.out.println("📊 Total de notas: " + estudiante.getNotas().size());
-                
-                for (int i = 0; i < estudiante.getNotas().size(); i++) {
-                    var nota = estudiante.getNotas().get(i);
-                    System.out.println("📊 Nota " + (i+1) + ":");
-                    System.out.println("    - Materia: '" + nota.getMateria() + "'");
-                    System.out.println("    - Puntaje: " + nota.getPuntaje());
-                    System.out.println("    - Nivel: '" + nota.getNivel() + "'");
-                }
-                
-                System.out.println("📊 Estructura JSON de notas: " + estudiante.getNotas().toString());
-            } else {
-                System.out.println("⚠️ === SIN NOTAS DISPONIBLES ===");
-                System.out.println("⚠️ El estudiante no tiene notas registradas");
-                System.out.println("⚠️ El reporte estará incompleto");
-            }
-            
-            // Cálculo de incentivo
-            String incentivo = calcularIncentivo(estudiante.getPuntajeGlobal());
-            System.out.println("💰 Incentivo calculado: " + incentivo);
-            
-            System.out.println("🌐 === ENVIANDO RESPUESTA AL FRONTEND ===");
-            System.out.println("🌐 Status: 200 OK");
-            System.out.println("🌐 Content-Type: application/json");
-            System.out.println("🌐 Datos del estudiante serializados exitosamente");
-            System.out.println("🚨 ==========================================");
-            System.out.println("🚨 === FIN ENDPOINT REPORTE INDIVIDUAL ===");
-            System.out.println("🚨 ==========================================");
-            
             return ResponseEntity.ok(estudiante);
             
         } catch (Exception e) {
-            System.err.println("💥 === ERROR CRÍTICO EN ENDPOINT REPORTE ===");
-            System.err.println("💥 Excepción: " + e.getClass().getSimpleName());
-            System.err.println("💥 Mensaje: " + e.getMessage());
-            System.err.println("💥 Stack trace:");
-            e.printStackTrace();
-            System.err.println("💥 Enviando respuesta 500...");
-            
             return ResponseEntity.status(500).build();
         }
     }
@@ -183,10 +113,6 @@ public class EstudianteController {
     // Crear estudiante
     @PostMapping("/resultados")
     public EstudianteResultado crearEstudiante(@RequestBody EstudianteResultado estudiante) {
-        System.out.println("🆕 [CREAR ESTUDIANTE] Iniciando creación de estudiante");
-        System.out.println("🆕 [CREAR ESTUDIANTE] Documento: " + estudiante.getDocumento());
-        System.out.println("🆕 [CREAR ESTUDIANTE] Nombre: " + estudiante.getNombreCompleto());
-        
         // Mapear campos del frontend a los del modelo
         if (estudiante.getNombreCompleto() == null || estudiante.getNombreCompleto().isEmpty()) {
             // Si viene como "nombre", mapearlo
@@ -201,73 +127,59 @@ public class EstudianteController {
         if (estudiante.getProgramaAcademico() == null) {
             estudiante.setProgramaAcademico("");
         }
-        
-        System.out.println("🆕 [CREAR ESTUDIANTE] Llamando a crearUsuarioAutomatico...");
+        estudiante.setNotas(recalcularNivelesNotas(estudiante.getNotas()));
         // Crear usuario automáticamente si no existe
         crearUsuarioAutomatico(estudiante.getDocumento());
-        
-        System.out.println("🆕 [CREAR ESTUDIANTE] Guardando estudiante en BD...");
-        EstudianteResultado estudianteGuardado = estudianteRepo.save(estudiante);
-        System.out.println("✅ [CREAR ESTUDIANTE] Estudiante guardado exitosamente");
-        
-        return estudianteGuardado;
+        return estudianteRepo.save(estudiante);
     }
 
     // Actualizar estudiante
     @PutMapping("/resultados/{documento}")
     public EstudianteResultado actualizarEstudiante(@PathVariable String documento, @RequestBody EstudianteResultado estudiante) {
-        System.out.println("=== ACTUALIZANDO ESTUDIANTE ===");
-        System.out.println("Documento: " + documento);
-        System.out.println("Datos recibidos:");
-        System.out.println("  - Nombre: " + estudiante.getNombreCompleto());
-        System.out.println("  - Programa: " + estudiante.getProgramaAcademico());
-        System.out.println("  - Puntaje Global: " + estudiante.getPuntajeGlobal());
-        
-        if (estudiante.getNotas() != null) {
-            System.out.println("  - Notas recibidas (" + estudiante.getNotas().size() + "):");
-            for (int i = 0; i < estudiante.getNotas().size(); i++) {
-                var nota = estudiante.getNotas().get(i);
-                System.out.println("    Nota " + (i+1) + ": [" + nota.getMateria() + "] = " + nota.getPuntaje());
-            }
-        } else {
-            System.out.println("  - ⚠️ NO SE RECIBIERON NOTAS");
-        }
-        
         EstudianteResultado existente = estudianteRepo.findByDocumento(documento);
         if (existente != null) {
-            System.out.println("Estudiante existente encontrado, actualizando...");
             // Mapear campos del frontend a los del modelo
-            if (estudiante.getNombreCompleto() == null || estudiante.getNombreCompleto().isEmpty()) {
-                try {
-                    java.lang.reflect.Field f = estudiante.getClass().getDeclaredField("nombre");
-                    f.setAccessible(true);
-                    Object nombre = f.get(estudiante);
-                    if (nombre != null) existente.setNombreCompleto(nombre.toString());
-                } catch (Exception ignored) {}
-            } else {
-                existente.setNombreCompleto(estudiante.getNombreCompleto());
-            }
+            if (estudiante.getTipoDocumento() != null) existente.setTipoDocumento(estudiante.getTipoDocumento());
+            if (estudiante.getPrimerNombre() != null) existente.setPrimerNombre(estudiante.getPrimerNombre());
+            if (estudiante.getSegundoNombre() != null) existente.setSegundoNombre(estudiante.getSegundoNombre());
+            if (estudiante.getPrimerApellido() != null) existente.setPrimerApellido(estudiante.getPrimerApellido());
+            if (estudiante.getSegundoApellido() != null) existente.setSegundoApellido(estudiante.getSegundoApellido());
+            if (estudiante.getCorreoElectronico() != null) existente.setCorreoElectronico(estudiante.getCorreoElectronico());
+            if (estudiante.getNumeroTelefono() != null) existente.setNumeroTelefono(estudiante.getNumeroTelefono());
+
+            // Reconstruir nombre completo con los campos individuales recibidos
+            existente.setNombreCompleto(construirNombreCompleto(existente));
             if (estudiante.getProgramaAcademico() != null) {
                 existente.setProgramaAcademico(estudiante.getProgramaAcademico());
             }
             existente.setPuntajeGlobal(estudiante.getPuntajeGlobal());
-            existente.setNotas(estudiante.getNotas());
+                existente.setNotas(recalcularNivelesNotas(estudiante.getNotas()));
             
-            EstudianteResultado resultado = estudianteRepo.save(existente);
-            System.out.println("✅ Estudiante actualizado exitosamente");
-            System.out.println("=== FIN ACTUALIZAR ESTUDIANTE ===");
-            return resultado;
+            return estudianteRepo.save(existente);
         } else {
-            System.out.println("Estudiante no existe, creando nuevo...");
-            
             // 🆕 Crear usuario automáticamente si no existe
             crearUsuarioAutomatico(estudiante.getDocumento());
             
-            EstudianteResultado resultado = estudianteRepo.save(estudiante);
-            System.out.println("✅ Nuevo estudiante creado");
-            System.out.println("=== FIN ACTUALIZAR ESTUDIANTE ===");
-            return resultado;
+            estudiante.setNombreCompleto(construirNombreCompleto(estudiante));
+            return estudianteRepo.save(estudiante);
         }
+    }
+
+    private String construirNombreCompleto(EstudianteResultado estudiante) {
+        StringBuilder nombre = new StringBuilder();
+        if (estudiante.getPrimerNombre() != null && !estudiante.getPrimerNombre().isBlank()) {
+            nombre.append(estudiante.getPrimerNombre().trim()).append(" ");
+        }
+        if (estudiante.getSegundoNombre() != null && !estudiante.getSegundoNombre().isBlank()) {
+            nombre.append(estudiante.getSegundoNombre().trim()).append(" ");
+        }
+        if (estudiante.getPrimerApellido() != null && !estudiante.getPrimerApellido().isBlank()) {
+            nombre.append(estudiante.getPrimerApellido().trim()).append(" ");
+        }
+        if (estudiante.getSegundoApellido() != null && !estudiante.getSegundoApellido().isBlank()) {
+            nombre.append(estudiante.getSegundoApellido().trim());
+        }
+        return nombre.toString().trim();
     }
 
     private String calcularIncentivo(Integer puntaje) {
@@ -280,40 +192,41 @@ public class EstudianteController {
 
     // 🆕 Método auxiliar para crear usuarios automáticamente
     private void crearUsuarioAutomatico(String documento) {
-        System.out.println("🔍 [USUARIO AUTO] Iniciando verificación para documento: " + documento);
-        
         try {
             if (documento == null || documento.trim().isEmpty()) {
-                System.out.println("❌ [USUARIO AUTO] Documento es null o vacío");
                 return;
             }
             
-            documento = documento.trim(); // Limpiar espacios
-            System.out.println("🔍 [USUARIO AUTO] Verificando si existe usuario con documento: " + documento);
-            
+            documento = documento.trim();
+
             Optional<Usuario> usuarioExistente = usuarioRepo.findByDocumento(documento);
             if (usuarioExistente.isPresent()) {
-                System.out.println("ℹ️ [USUARIO AUTO] Usuario ya existe para documento: " + documento);
-                System.out.println("ℹ️ [USUARIO AUTO] Usuario existente - Rol: " + usuarioExistente.get().getRol());
                 return;
             }
             
-            System.out.println("📝 [USUARIO AUTO] Creando nuevo usuario para documento: " + documento);
             Usuario nuevoUsuario = new Usuario();
             nuevoUsuario.setDocumento(documento);
             nuevoUsuario.setRol("ESTUDIANTE");
             nuevoUsuario.setPassword(documento); // Contraseña igual al documento
             
-            Usuario usuarioGuardado = usuarioRepo.save(nuevoUsuario);
-            System.out.println("✅ [USUARIO AUTO] Usuario creado exitosamente:");
-            System.out.println("   - Documento: " + usuarioGuardado.getDocumento());
-            System.out.println("   - Rol: " + usuarioGuardado.getRol());
-            
+            usuarioRepo.save(nuevoUsuario);
         } catch (Exception e) {
-            System.err.println("❌ [USUARIO AUTO] Error al crear usuario automático:");
-            System.err.println("   - Documento: " + documento);
-            System.err.println("   - Error: " + e.getMessage());
-            e.printStackTrace();
+            // Ignorar creación automática fallida, ya que no debe bloquear el flujo principal
+        }
+    }
+
+    private void eliminarUsuarioAsociado(String documento) {
+        try {
+            if (documento == null || documento.trim().isEmpty()) {
+                return;
+            }
+
+            String docNormalizado = documento.trim();
+            usuarioRepo.findByDocumento(docNormalizado)
+                .filter(usuario -> usuario.getRol() == null || !"COORDINADOR".equalsIgnoreCase(usuario.getRol()))
+                .ifPresent(usuarioRepo::delete);
+        } catch (Exception ignored) {
+            // No bloquear la eliminación de estudiantes si no se puede eliminar el usuario asociado
         }
     }
 
@@ -325,6 +238,12 @@ public class EstudianteController {
         try {
             if (archivo.isEmpty()) {
                 response.put("error", "El archivo está vacío");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            String nombreArchivo = archivo.getOriginalFilename();
+            if (nombreArchivo == null) {
+                response.put("error", "El archivo no tiene un nombre válido");
                 return ResponseEntity.badRequest().body(response);
             }
             
@@ -349,7 +268,7 @@ public class EstudianteController {
                     }
                     importados++;
                 } catch (Exception e) {
-                    System.err.println("Error al guardar estudiante " + estudiante.getDocumento() + ": " + e.getMessage());
+                    // Ignora el error para continuar con el resto de estudiantes
                 }
             }
             
@@ -372,9 +291,14 @@ public class EstudianteController {
             Workbook workbook;
             
             // Determinar el tipo de archivo Excel
-            if (archivo.getOriginalFilename().endsWith(".xlsx")) {
+            String nombreArchivo = archivo.getOriginalFilename();
+            if (nombreArchivo == null) {
+                throw new IllegalArgumentException("El archivo no tiene un nombre válido");
+            }
+
+            if (nombreArchivo.endsWith(".xlsx")) {
                 workbook = new XSSFWorkbook(inputStream);
-            } else if (archivo.getOriginalFilename().endsWith(".xls")) {
+            } else if (nombreArchivo.endsWith(".xls")) {
                 workbook = new HSSFWorkbook(inputStream);
             } else {
                 throw new IllegalArgumentException("Formato de archivo no soportado");
@@ -402,56 +326,43 @@ public class EstudianteController {
     private EstudianteResultado procesarFilaExcel(Row row) {
         try {
             EstudianteResultado estudiante = new EstudianteResultado();
-            
-            // Leer campos según el orden de la plantilla
+
+            // Leer campos según el orden de la plantilla y mapearlos al modelo
             estudiante.setDocumento(getCellValueAsString(row.getCell(0))); // documento
-            // tipoDocumento en columna 1 - no lo usamos en el modelo actual
+            estudiante.setTipoDocumento(getCellValueAsString(row.getCell(1))); // tipoDocumento
+
             String primerApellido = getCellValueAsString(row.getCell(2));
             String segundoApellido = getCellValueAsString(row.getCell(3));
             String primerNombre = getCellValueAsString(row.getCell(4));
             String segundoNombre = getCellValueAsString(row.getCell(5));
-            
-            // Construir nombre completo
-            StringBuilder nombreCompleto = new StringBuilder();
-            if (primerNombre != null && !primerNombre.isEmpty()) nombreCompleto.append(primerNombre);
-            if (segundoNombre != null && !segundoNombre.isEmpty()) nombreCompleto.append(" ").append(segundoNombre);
-            if (primerApellido != null && !primerApellido.isEmpty()) nombreCompleto.append(" ").append(primerApellido);
-            if (segundoApellido != null && !segundoApellido.isEmpty()) nombreCompleto.append(" ").append(segundoApellido);
-            
-            estudiante.setNombreCompleto(nombreCompleto.toString().trim());
-            
-            // Otros campos
-            // correoElectronico en columna 6 - no lo usamos en el modelo actual
-            // numeroTelefono en columna 7 - no lo usamos en el modelo actual
+
+            estudiante.setPrimerApellido(primerApellido);
+            estudiante.setSegundoApellido(segundoApellido);
+            estudiante.setPrimerNombre(primerNombre);
+            estudiante.setSegundoNombre(segundoNombre);
+
+            estudiante.setCorreoElectronico(getCellValueAsString(row.getCell(6)));
+            estudiante.setNumeroTelefono(getCellValueAsString(row.getCell(7)));
+
+            // Construir nombre completo a partir de los campos individuales
+            estudiante.setNombreCompleto(construirNombreCompleto(estudiante));
+
             estudiante.setProgramaAcademico(getCellValueAsString(row.getCell(8))); // programaAcademico
-            estudiante.setPuntajeGlobal(getCellValueAsInteger(row.getCell(9))); // puntajeGlobal
-            
-            // Crear lista de notas con las competencias
+            Integer puntajeGlobal = getCellValueAsInteger(row.getCell(9));
+            estudiante.setPuntajeGlobal(puntajeGlobal != null ? puntajeGlobal : 0); // puntajeGlobal
+
+            // Crear lista de notas con las competencias en el mismo orden que el frontend
             List<com.saberpro.model.Nota> notas = new ArrayList<>();
-            
-            // Competencias genéricas
-            Integer comunicacionEscrita = getCellValueAsInteger(row.getCell(10));
-            if (comunicacionEscrita != null) notas.add(new com.saberpro.model.Nota("Comunicación Escrita", comunicacionEscrita, calcularNivel(comunicacionEscrita)));
-            
-            Integer razonamientoCuantitativo = getCellValueAsInteger(row.getCell(11));
-            if (razonamientoCuantitativo != null) notas.add(new com.saberpro.model.Nota("Razonamiento Cuantitativo", razonamientoCuantitativo, calcularNivel(razonamientoCuantitativo)));
-            
-            Integer lecturaCritica = getCellValueAsInteger(row.getCell(12));
-            if (lecturaCritica != null) notas.add(new com.saberpro.model.Nota("Lectura Crítica", lecturaCritica, calcularNivel(lecturaCritica)));
-            
-            Integer competenciasCiudadanas = getCellValueAsInteger(row.getCell(13));
-            if (competenciasCiudadanas != null) notas.add(new com.saberpro.model.Nota("Competencias Ciudadanas", competenciasCiudadanas, calcularNivel(competenciasCiudadanas)));
-            
-            Integer ingles = getCellValueAsInteger(row.getCell(14));
-            if (ingles != null) notas.add(new com.saberpro.model.Nota("Inglés", ingles, calcularNivel(ingles)));
-            
-            // Competencias específicas
-            Integer formulacionProyectos = getCellValueAsInteger(row.getCell(15));
-            if (formulacionProyectos != null) notas.add(new com.saberpro.model.Nota("Formulación de Proyectos de Ingeniería", formulacionProyectos, calcularNivel(formulacionProyectos)));
-            
-            Integer disenoSoftware = getCellValueAsInteger(row.getCell(16));
-            if (disenoSoftware != null) notas.add(new com.saberpro.model.Nota("Diseño de Software", disenoSoftware, calcularNivel(disenoSoftware)));
-            
+
+            agregarNota(notas, "Comunicación Escrita", getCellValueAsInteger(row.getCell(10)));
+            agregarNota(notas, "Razonamiento Cuantitativo", getCellValueAsInteger(row.getCell(11)));
+            agregarNota(notas, "Lectura Crítica", getCellValueAsInteger(row.getCell(12)));
+            agregarNota(notas, "Competencias Ciudadanas", getCellValueAsInteger(row.getCell(13)));
+            agregarNota(notas, "Inglés", getCellValueAsInteger(row.getCell(14)));
+            agregarNota(notas, "Formulación de Proyectos de Ingeniería", getCellValueAsInteger(row.getCell(15)));
+            agregarNota(notas, "Diseño de Software", getCellValueAsInteger(row.getCell(16)));
+            agregarNota(notas, "Pensamiento Científico, Matemáticas y Estadística", getCellValueAsInteger(row.getCell(17)));
+
             estudiante.setNotas(notas);
             
             // Calcular estado de incentivos
@@ -460,7 +371,6 @@ public class EstudianteController {
             return estudiante;
             
         } catch (Exception e) {
-            System.err.println("Error al procesar fila: " + e.getMessage());
             return null;
         }
     }
@@ -506,19 +416,89 @@ public class EstudianteController {
         }
     }
     
-    private String calcularNivel(Integer puntaje) {
-        if (puntaje == null) return "Sin Evaluar";
-        if (puntaje >= 241) return "Excelente";
-        if (puntaje >= 211) return "Muy Bueno";
-        if (puntaje >= 180) return "Bueno";
-        if (puntaje >= 150) return "Regular";
-        return "Deficiente";
+    private void agregarNota(List<com.saberpro.model.Nota> notas, String materia, Integer puntaje) {
+        int valor = puntaje != null ? puntaje : 0;
+        notas.add(new com.saberpro.model.Nota(materia, valor, calcularNivelMateria(materia, valor)));
+    }
+
+    private List<com.saberpro.model.Nota> recalcularNivelesNotas(List<com.saberpro.model.Nota> notas) {
+        if (notas == null) {
+            return null;
+        }
+        List<com.saberpro.model.Nota> resultado = new ArrayList<>();
+        for (com.saberpro.model.Nota nota : notas) {
+            if (nota == null) {
+                continue;
+            }
+            String materia = nota.getMateria();
+            Integer puntaje = nota.getPuntaje() != null ? nota.getPuntaje() : 0;
+            resultado.add(new com.saberpro.model.Nota(materia, puntaje, calcularNivelMateria(materia, puntaje)));
+        }
+        return resultado;
+    }
+
+    private String calcularNivelMateria(String materia, Integer puntaje) {
+        if (puntaje == null) {
+            return "Sin información";
+        }
+        String nombreNormalizado = materia != null ? normalizar(materia) : "";
+        if (nombreNormalizado.contains("ingles")) {
+            return calcularNivelIngles(puntaje);
+        }
+        return calcularNivelGeneral(puntaje);
+    }
+
+    private String calcularNivelGeneral(int puntaje) {
+        if (puntaje >= 180) return "Nivel 4";
+        if (puntaje >= 150) return "Nivel 3";
+        if (puntaje >= 120) return "Nivel 2";
+        return "Nivel 1";
+    }
+
+    private String calcularNivelIngles(int puntaje) {
+        if (puntaje >= 190) return "B2";
+        if (puntaje >= 160) return "B1";
+        if (puntaje >= 135) return "A2";
+        if (puntaje >= 110) return "A1";
+        return "A0";
     }
     
     private void actualizarDatosEstudiante(EstudianteResultado existente, EstudianteResultado nuevo) {
-        if (nuevo.getNombreCompleto() != null && !nuevo.getNombreCompleto().isEmpty()) {
+        if (nuevo.getTipoDocumento() != null && !nuevo.getTipoDocumento().isBlank()) {
+            existente.setTipoDocumento(nuevo.getTipoDocumento());
+        }
+
+        boolean nombresActualizados = false;
+        if (nuevo.getPrimerNombre() != null && !nuevo.getPrimerNombre().isBlank()) {
+            existente.setPrimerNombre(nuevo.getPrimerNombre());
+            nombresActualizados = true;
+        }
+        if (nuevo.getSegundoNombre() != null && !nuevo.getSegundoNombre().isBlank()) {
+            existente.setSegundoNombre(nuevo.getSegundoNombre());
+            nombresActualizados = true;
+        }
+        if (nuevo.getPrimerApellido() != null && !nuevo.getPrimerApellido().isBlank()) {
+            existente.setPrimerApellido(nuevo.getPrimerApellido());
+            nombresActualizados = true;
+        }
+        if (nuevo.getSegundoApellido() != null && !nuevo.getSegundoApellido().isBlank()) {
+            existente.setSegundoApellido(nuevo.getSegundoApellido());
+            nombresActualizados = true;
+        }
+
+        if (nuevo.getCorreoElectronico() != null && !nuevo.getCorreoElectronico().isBlank()) {
+            existente.setCorreoElectronico(nuevo.getCorreoElectronico());
+        }
+        if (nuevo.getNumeroTelefono() != null && !nuevo.getNumeroTelefono().isBlank()) {
+            existente.setNumeroTelefono(nuevo.getNumeroTelefono());
+        }
+
+        if (nombresActualizados) {
+            existente.setNombreCompleto(construirNombreCompleto(existente));
+        } else if (nuevo.getNombreCompleto() != null && !nuevo.getNombreCompleto().isEmpty()) {
             existente.setNombreCompleto(nuevo.getNombreCompleto());
         }
+
         if (nuevo.getProgramaAcademico() != null && !nuevo.getProgramaAcademico().isEmpty()) {
             existente.setProgramaAcademico(nuevo.getProgramaAcademico());
         }
@@ -526,7 +506,7 @@ public class EstudianteController {
             existente.setPuntajeGlobal(nuevo.getPuntajeGlobal());
         }
         if (nuevo.getNotas() != null && !nuevo.getNotas().isEmpty()) {
-            existente.setNotas(nuevo.getNotas());
+            existente.setNotas(recalcularNivelesNotas(nuevo.getNotas()));
         }
         if (nuevo.getEstadoIncentivos() != null) {
             existente.setEstadoIncentivos(nuevo.getEstadoIncentivos());
@@ -536,9 +516,6 @@ public class EstudianteController {
     // Endpoint temporal para corregir datos del estudiante 1097302429
     @PostMapping("/estudiantes/corregir/{documento}")
     public ResponseEntity<String> corregirEstudianteDatos(@PathVariable String documento) {
-        System.out.println("🔧 === CORRIGIENDO DATOS DEL ESTUDIANTE ===");
-        System.out.println("🔧 Documento: " + documento);
-        
         try {
             EstudianteResultado estudiante = estudianteRepo.findByDocumento(documento);
             
@@ -548,8 +525,6 @@ public class EstudianteController {
             
             // Corregir datos específicos para el estudiante 1097302429
             if ("1097302429".equals(documento)) {
-                System.out.println("🔧 Aplicando correcciones específicas...");
-                
                 // Corregir nombre
                 estudiante.setNombreCompleto("Alexis Fabians Jaimes Vergels");
                 
@@ -578,22 +553,12 @@ public class EstudianteController {
                 
                 // Guardar cambios
                 estudianteRepo.save(estudiante);
-                
-                System.out.println("✅ Datos corregidos exitosamente:");
-                System.out.println("✅ Nombre: " + estudiante.getNombreCompleto());
-                System.out.println("✅ Puntaje Global: " + estudiante.getPuntajeGlobal());
-                System.out.println("✅ Nivel ICFES: " + estudiante.getNivelIcfes());
-                System.out.println("✅ Percentil: " + estudiante.getPercentil());
-                System.out.println("✅ Total de notas: " + estudiante.getNotas().size());
-                
                 return ResponseEntity.ok("Datos corregidos exitosamente");
             }
             
             return ResponseEntity.badRequest().body("No hay correcciones definidas para este estudiante");
             
         } catch (Exception e) {
-            System.err.println("💥 Error al corregir datos: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.status(500).body("Error interno: " + e.getMessage());
         }
     }
@@ -601,14 +566,10 @@ public class EstudianteController {
     // 🆕 Endpoint para obtener perfil completo del estudiante logueado
     @GetMapping("/estudiante/perfil/{documento}")
     public ResponseEntity<Map<String, Object>> getPerfilEstudiante(@PathVariable String documento) {
-        System.out.println("👤 === OBTENIENDO PERFIL ESTUDIANTE ===");
-        System.out.println("👤 Documento: " + documento);
-        
         try {
             // Obtener datos del estudiante
             EstudianteResultado estudiante = estudianteRepo.findByDocumento(documento);
             if (estudiante == null) {
-                System.out.println("❌ Estudiante no encontrado: " + documento);
                 return ResponseEntity.notFound().build();
             }
             
@@ -622,13 +583,9 @@ public class EstudianteController {
             perfil.put("puntajeGlobal", estudiante.getPuntajeGlobal());
             perfil.put("correo", estudiante.getCorreoElectronico());
             perfil.put("telefono", estudiante.getNumeroTelefono());
-            
-            System.out.println("✅ Perfil obtenido para: " + estudiante.getPrimerNombre() + " " + estudiante.getPrimerApellido());
             return ResponseEntity.ok(perfil);
             
         } catch (Exception e) {
-            System.err.println("❌ Error obteniendo perfil: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.status(500).build();
         }
     }

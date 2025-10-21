@@ -1,6 +1,7 @@
 package com.saberpro.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDate;
 import java.util.List;
@@ -9,7 +10,9 @@ import java.util.List;
 public class ResultadoSaberPro {
     @Id
     private String id;
+    @Indexed
     private String numeroRegistro;
+    @Indexed
     private String documento;
     private String tipoDocumento;
     private String primerApellido;
@@ -18,10 +21,12 @@ public class ResultadoSaberPro {
     private String segundoNombre;
     private String correoElectronico;
     private String numeroTelefono;
+    @Indexed
     private String programaAcademico;
     private LocalDate fechaExamen;
     
     // Puntajes Saber PRO (0-300 puntos)
+    @Indexed
     private Integer puntajeGlobal;
     private Integer comunicacionEscrita;
     private String comunicacionEscritaNivel;
@@ -41,6 +46,7 @@ public class ResultadoSaberPro {
     private String disenoSoftwareNivel;
     
     // Estado académico y incentivos
+    @Indexed
     private String estadoGraduacion; // PUEDE_GRADUAR, NO_PUEDE_GRADUAR
     private List<String> incentivosObtenidos;
     private String nivelIncentivos; // EXONERADO_SEMINARIO, BECA_50%, BECA_100%

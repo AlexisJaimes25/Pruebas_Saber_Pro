@@ -6,4 +6,5 @@ import java.util.Optional;
 
 public interface UsuarioRepository extends MongoRepository<Usuario, String> {
     Optional<Usuario> findByDocumento(String documento);
+    Optional<Usuario> findByDocumentoIgnoreCase(String documento);
 }
